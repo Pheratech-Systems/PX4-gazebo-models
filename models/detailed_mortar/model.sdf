@@ -4,11 +4,11 @@
     <!-- Dynamic rigid body. Add <static>true</static> to freeze it as a prop. -->
     <link name="link">
 
-      <!-- Real 60 mm mortar round ~= 1.36 kg. Inertia as a solid cylinder
+      <!-- Real 60 mm mortar round ~= 1.36 kg. Inertia as a solid cylinder (0.1 kg for easier sitl)
            r=0.03 m, L=0.235 m about its long (Z) axis; CoM at mid-height. -->
       <inertial>
         <pose>0 0 0.118 0 0 0</pose>
-        <mass>1.36</mass>
+        <mass>0.1</mass>
         <inertia>
           <ixx>0.0066</ixx>
           <iyy>0.0066</iyy>
