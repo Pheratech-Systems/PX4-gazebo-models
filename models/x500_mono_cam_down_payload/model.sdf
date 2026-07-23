@@ -20,7 +20,7 @@
 
     <!-- Payload -->
     <include>
-      <uri>model://coke_can</uri>
+      <uri>model://detailed_mortar</uri>
       <name>payload</name>
       <pose>0.1 0 0.05 0 0 0</pose>
     </include>

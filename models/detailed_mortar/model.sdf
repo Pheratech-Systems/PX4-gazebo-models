@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <model name="detailed_mortar">
+    <!-- Dynamic rigid body. Add <static>true</static> to freeze it as a prop. -->
+    <link name="link">
+
+      <!-- Real 60 mm mortar round ~= 1.36 kg. Inertia as a solid cylinder
+           r=0.03 m, L=0.235 m about its long (Z) axis; CoM at mid-height. -->
+      <inertial>
+        <pose>0 0 0.118 0 0 0</pose>
+        <mass>1.36</mass>
+        <inertia>
+          <ixx>0.0066</ixx>
+          <iyy>0.0066</iyy>
+          <izz>0.00061</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+
+      <!-- Textured glTF visual.
+           Raw mesh is ~0.535 m wide x 2.10 m long, lying along Y, so:
+             scale 0.112 -> real 60 mm dia x ~0.235 m long
+             roll +90deg (1.5708) -> long axis Y maps to +Z (stands upright)
+             z +0.118 -> bottom sits on the ground plane
+           Textures (PBR) are embedded in the .glb; nothing to wire up. -->
+      <visual name="visual">
+        <pose>0 0 0.118 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://detailed_mortar/u.s._wwii_60mm_mortar_round.glb</uri>
+            <scale>0.112 0.112 0.112</scale>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <!-- Simple cylinder collision wrapping the round (long axis = Z). -->
+      <collision name="collision">
+        <pose>0 0 0.118 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.03</radius><length>0.235</length></cylinder>
+        </geometry>
+      </collision>
+
+    </link>
+  </model>
+</sdf>
