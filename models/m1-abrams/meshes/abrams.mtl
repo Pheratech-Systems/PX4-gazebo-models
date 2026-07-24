@@ -1,0 +1,29 @@
+# Abrams MTL — textures wired up for Gazebo (albedo + normal).
+# Material.001 = main hull/turret (None_* set), Material.002 = details (None1_* set).
+# Material Count: 2
+
+newmtl Material.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd None_albedo.jpg
+map_Bump None_normal.jpg
+norm None_normal.jpg
+
+newmtl Material.002
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd None1_albedo.jpg
+map_Bump None1_normal.jpg
+norm None1_normal.jpg
