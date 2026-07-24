@@ -41,6 +41,13 @@
         </geometry>
       </collision>
 
+      <sensor name="payload_contact" type="contact">
+        <contact>
+          <collision>collision</collision>
+        </contact>
+        <update_rate>200</update_rate>
+      </sensor>
+
     </link>
   </model>
 </sdf>
