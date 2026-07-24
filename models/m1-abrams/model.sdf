@@ -11,7 +11,7 @@
              x +1.54 (centre length), y -1.70 (centre width), z -0.28 (drop to ground)
            Mesh is already metric and Z-up, so no rotation/scale needed. -->
       <visual name="visual">
-        <pose>1.54 -1.70 -0.28 0 0 0</pose>
+        <pose>0 0 -0.2 0 0 0</pose>
         <geometry>
           <mesh>
             <uri>model://m1-abrams/meshes/abrams.obj</uri>
