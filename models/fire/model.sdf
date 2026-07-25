@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <model name="fire">
+    <static>true</static>
+    <link name="link">
+
+      <!-- CONTINUOUS fire (a burning flame, not a one-shot boom).
+           <emitting>true    -> starts burning the instant it loads; no trigger needed.
+           no <duration>     -> emits forever (until you stop it or delete the model).
+           gentle upward velocity + upward-aimed emitter -> flames rise and lick.
+           color_start/end   -> bright orange flame fading to dark smoke.
+
+           The <pose> pitch (-1.5708) aims the emitter's local +X axis straight up
+           (particles are emitted along +X), so the fire rises in world +Z. Place
+           the model at ground level with no extra rotation and it burns upright.
+
+           To EXTINGUISH it at runtime (or re-light):
+             gz topic -t /model/fire/link/link/particle_emitter/emitter/cmd \
+               -m gz.msgs.ParticleEmitter -p 'emitting: {data: false}' -->
+      <particle_emitter name="emitter" type="point">
+        <pose>0 0 0 0 -1.5708 0</pose>
+        <emitting>true</emitting>
+        <size>0.6 0.6 0.6</size>
+        <particle_size>0.7 0.7 0.7</particle_size>
+        <lifetime>2.0</lifetime>
+        <min_velocity>1.0</min_velocity>
+        <max_velocity>3.0</max_velocity>
+        <scale_rate>1.0</scale_rate>
+        <rate>200</rate>
+        <color_start>1.0 0.6 0.1 1</color_start>
+        <color_end>0.2 0.2 0.2 1</color_end>
+        <material>
+          <diffuse>1.0 0.6 0.2 1</diffuse>
+          <specular>0.2 0.2 0.2 1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://fire/materials/textures/puff.png</albedo_map>
+            </metal>
+          </pbr>
+        </material>
+      </particle_emitter>
+
+    </link>
+  </model>
+</sdf>
