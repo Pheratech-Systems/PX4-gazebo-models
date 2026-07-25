@@ -44,6 +44,7 @@ os.environ.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
 import argparse
 import math
 import re
+import signal
 import subprocess
 import sys
 import threading
@@ -72,8 +73,9 @@ REARM_IDLE_SEC = 3.0             # re-arm if contacts go quiet this long (backup
 # --- sim liveness (--exit-with-sim) ---
 # Poll the topic list rather than watching message flow: a GUI-paused sim stops
 # publishing /clock and pose/info but keeps the topics advertised, and pausing must
-# not look like a dead sim.
-SIM_POLL_SEC = 10.0
+# not look like a dead sim. This is the backstop for a sim that dies without
+# signalling us (e.g. `pkill gz sim`); Ctrl-C is handled by install_signal_handlers().
+SIM_POLL_SEC = 3.0
 SIM_MISSES_TO_EXIT = 2
 
 # --- logging ---
@@ -93,6 +95,28 @@ def warn(msg):
 
 def err(msg):
     print(f"ERROR [{TAG}] {msg}", flush=True)
+
+
+def install_signal_handlers():
+    """Die with the terminal that started the sim.
+
+    px4-rc.gzsim starts us as a background job of a non-interactive shell, and POSIX
+    has `sh` set SIGINT/SIGQUIT to SIG_IGN for async jobs — a disposition that
+    survives exec. Without this, Ctrl-C in the sim's terminal stops PX4 and gz but
+    NOT us, and we keep writing to a console whose prompt has already come back until
+    the --exit-with-sim poll notices. Restoring the default disposition (plus SIGHUP /
+    SIGTERM) makes the scorer go down with everything else.
+
+    Exit is silent on purpose: the shell prompt is already back by then, so a farewell
+    line would just land on top of it."""
+    def _quit(_signum, _frame):
+        os._exit(0)
+
+    for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        try:
+            signal.signal(sig, _quit)
+        except (ValueError, OSError):
+            pass  # not on the main thread / unsupported — the poll backstop still applies
 
 
 # --- explosion/fire VFX (spawned already emitting; no trigger topic needed) ---
@@ -352,6 +376,8 @@ def main():
                     help="detach command topic; each message re-arms the scorer "
                          "(default: /model/<model>/detachable_joint/detach)")
     args = ap.parse_args()
+
+    install_signal_handlers()
 
     topics = topic_list()
     world = args.world or find_world(topics) or DEFAULT_WORLD
