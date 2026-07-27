@@ -91,8 +91,13 @@
       <elevation>0</elevation>
     </spherical_coordinates>
 
-    <include>
-      <uri>model://arucotag</uri>
-    </include>
+      <plugin filename="ImageDisplay" name="Downward camera">
+        <gz-gui>
+          <title>Downward camera</title>
+          <property key="state" type="string">docked</property>
+        </gz-gui>
+        <topic>/world/aruco/model/x500_mono_cam_down_0/link/camera_link/sensor/imager/image</topic>
+        <topic_picker>true</topic_picker>
+      </plugin>
   </world>
 </sdf>
