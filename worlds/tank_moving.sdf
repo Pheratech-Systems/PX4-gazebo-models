@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.9">
+  <world name="tank_moving">
+    <physics type="ode">
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type="adiabatic"/>
+    <scene>
+      <grid>false</grid>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>true</shadows>
+    </scene>
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>1 1</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>500 500</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0 0 -0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>1</mass>
+          <inertia>
+            <ixx>1</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>1</iyy>
+            <iyz>0</iyz>
+            <izz>1</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>0 0 0 0 -0 0</pose>
+      <self_collide>false</self_collide>
+    </model>
+    <light name="sunUTC" type="directional">
+      <pose>0 0 500 0 -0 0</pose>
+      <cast_shadows>true</cast_shadows>
+      <intensity>1</intensity>
+      <direction>0.001 0.625 -0.78</direction>
+      <diffuse>0.904 0.904 0.904 1</diffuse>
+      <specular>0.271 0.271 0.271 1</specular>
+      <attenuation>
+        <range>2000</range>
+        <linear>0</linear>
+        <constant>1</constant>
+        <quadratic>0</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>0</inner_angle>
+        <outer_angle>0</outer_angle>
+        <falloff>0</falloff>
+      </spot>
+    </light>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>47.397971057728974</latitude_deg>
+      <longitude_deg> 8.546163739800146</longitude_deg>
+      <elevation>0</elevation>
+    </spherical_coordinates>
+
+    <include>
+      <uri>model://m1-abrams</uri>
+      <pose>8 8 -0.2 1.57 0 0</pose>
+    </include>
+
+    <!-- Moving tank. An actor cannot <include> a model, so we give it its own
+         link/visual using the same mesh and centring offset as the m1-abrams
+         model; the trajectory below drives this link's world pose. -->
+    <actor name="m1-abrams_1">
+      <link name="body">
+        <visual name="visual">
+          <pose>0 0 -0.2 0 3.14 0</pose>
+          <geometry>
+            <mesh>
+              <uri>model://m1-abrams/meshes/abrams.obj</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+
+      <script>
+        <loop>true</loop>
+        <delay_start>0.0</delay_start>
+        <auto_start>true</auto_start>
+        <!-- CCW square: A(-50,-50) B(50,-50) C(50,50) D(-50,50), 100 m legs.
+             Tank motion: drive a leg straight over 30 s (~3.3 m/s, yaw held),
+             then pivot in place 90 deg over 5 s (position held) at each corner.
+             140 s per lap. Nose is local +X, so yaw on each leg equals its
+             travel bearing (east=0, north=pi/2, west=pi, south=3pi/2); final
+             yaw 2pi loops smoothly back to the start heading. -->
+        <trajectory id="0" type="driving" tension="1.0">
+          <waypoint><time>0.0</time>   <pose>-50 -50 -0.2 1.57 0 0.0</pose></waypoint>
+          <waypoint><time>30.0</time>  <pose> 50 -50 -0.2 1.57 0 0.0</pose></waypoint>
+          <waypoint><time>31.0</time> <pose> 50 -50 -0.2 1.57 0 0.31416</pose></waypoint>
+          <waypoint><time>32.0</time>  <pose> 50 -50 -0.2 1.57 0 0.62832</pose></waypoint>
+          <waypoint><time>33.0</time> <pose> 50 -50 -0.2 1.57 0 0.94248</pose></waypoint>
+          <waypoint><time>34.0</time> <pose> 50 -50 -0.2 1.57 0 1.25664</pose></waypoint>
+          <waypoint><time>35.0</time>  <pose> 50 -50 -0.2 1.57 0 1.5708</pose></waypoint>
+          <waypoint><time>65.0</time>  <pose> 50  50 -0.2 1.57 0 1.5708</pose></waypoint>
+          <waypoint><time>66.0</time>  <pose> 50  50 -0.2 1.57 0 1.88496</pose></waypoint>
+          <waypoint><time>67.0</time>  <pose> 50  50 -0.2 1.57 0 2.19912</pose></waypoint>
+          <waypoint><time>68.0</time>  <pose> 50  50 -0.2 1.57 0 2.51328</pose></waypoint>
+          <waypoint><time>69.0</time>  <pose> 50  50 -0.2 1.57 0 2.82744</pose></waypoint>
+          <waypoint><time>70.0</time>  <pose> 50  50 -0.2 1.57 0 3.1416</pose></waypoint>
+          <waypoint><time>100.0</time> <pose>-50  50 -0.2 1.57 0 3.1416</pose></waypoint>
+          <waypoint><time>101.0</time> <pose>-50  50 -0.2 1.57 0 3.45576</pose></waypoint>
+          <waypoint><time>102.0</time> <pose>-50  50 -0.2 1.57 0 3.76992</pose></waypoint>
+          <waypoint><time>103.0</time> <pose>-50  50 -0.2 1.57 0 4.08408</pose></waypoint>
+          <waypoint><time>104.0</time> <pose>-50  50 -0.2 1.57 0 4.39824</pose></waypoint>
+          <waypoint><time>105.0</time> <pose>-50  50 -0.2 1.57 0 4.7124</pose></waypoint>
+          <waypoint><time>135.0</time> <pose>-50 -50 -0.2 1.57 0 4.7124</pose></waypoint>
+          <waypoint><time>136.0</time> <pose>-50 -50 -0.2 1.57 0 5.02656</pose></waypoint>
+          <waypoint><time>137.0</time> <pose>-50 -50 -0.2 1.57 0 5.34072</pose></waypoint>
+          <waypoint><time>138.0</time> <pose>-50 -50 -0.2 1.57 0 5.65488</pose></waypoint>
+          <waypoint><time>139.0</time> <pose>-50 -50 -0.2 1.57 0 5.96904</pose></waypoint>
+          <waypoint><time>140.0</time> <pose>-50 -50 -0.2 1.57 0 6.2832</pose></waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+  </world>
+</sdf>

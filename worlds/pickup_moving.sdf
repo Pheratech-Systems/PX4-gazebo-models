@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sdf version="1.9">
-  <world name="tank">
+  <world name="pickup_moving">
     <physics type="ode">
       <max_step_size>0.004</max_step_size>
       <real_time_factor>1.0</real_time_factor>
@@ -92,8 +92,48 @@
     </spherical_coordinates>
 
     <include>
-      <uri>model://m1-abrams</uri>
-      <pose>8 8 -0.2 1.57 0 0</pose>
+      <uri>model://pickup</uri>
+      <pose>8 8 0 0 0 0</pose>
     </include>
+
+    <!-- Moving pickup. An actor cannot <include> a model, so we give it its own
+         link/visual using the same mesh and centring offset as the pickup
+         model; the trajectory below drives this link's world pose. -->
+    <actor name="pickup_1">
+      <link name="body">
+        <visual name="visual">
+          <pose>0 0 0 0 0 3.14</pose>
+          <geometry>
+            <mesh>
+              <uri>model://pickup/meshes/pickup.dae</uri>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+
+      <script>
+        <loop>true</loop>
+        <delay_start>0.0</delay_start>
+        <auto_start>true</auto_start>
+        <!-- CCW square: A(-50,-50) B(50,-50) C(50,50) D(-50,50), 100 m legs.
+             pickup motion: drive a leg straight over 30 s (~3.3 m/s, yaw held) -->
+        <trajectory id="0" type="driving" tension="1.0">
+          <waypoint><time>0.0</time>   <pose>-50 -50 0 0 0 0.78</pose></waypoint>
+          <waypoint><time>2.0</time>   <pose>-48 -50 0 0 0 1.57</pose></waypoint>
+          <waypoint><time>28.0</time>  <pose> 48 -50 0 0 0 1.57</pose></waypoint>
+          <waypoint><time>30.0</time>  <pose> 50 -50 0 0 0 2.35</pose></waypoint>
+          <waypoint><time>32.0</time>  <pose> 50 -48 0 0 0 3.14</pose></waypoint>
+          <waypoint><time>63.0</time>  <pose> 50  48 0 0 0 3.14</pose></waypoint>
+          <waypoint><time>65.0</time>  <pose> 50  50 0 0 0 3.92</pose></waypoint>
+          <waypoint><time>67.0</time>  <pose> 48  50 0 0 0 4.71</pose></waypoint>
+          <waypoint><time>98.0</time>  <pose>-48  50 0 0 0 4.71</pose></waypoint>
+          <waypoint><time>100.0</time> <pose>-50  50 0 0 0 5.49</pose></waypoint>
+          <waypoint><time>102.0</time> <pose>-50  48 0 0 0 6.28</pose></waypoint>
+          <waypoint><time>133.0</time> <pose>-50 -48 0 0 0 6.28</pose></waypoint>
+          <waypoint><time>135.0</time> <pose>-50 -50 0 0 0 7.06</pose></waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
   </world>
 </sdf>
