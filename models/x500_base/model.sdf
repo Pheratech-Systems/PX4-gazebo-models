@@ -18,8 +18,30 @@
       </inertial>
       <gravity>true</gravity>
       <velocity_decay />
+      <!-- Airframe visuals are hidden from payload cameras that opt in by setting
+           <visibility_mask>134217728</visibility_mask> (bit 27, 0x08000000).
+           A camera sees a visual when (mask & flags) != 0, so:
+             flags 134217727 = 0x07FFFFFF = GZ_VISIBILITY_ALL with bit 27 cleared
+           Bits 0 and 1 are reserved by gz-rendering (GZ_VISIBILITY_GUI and
+           GZ_VISIBILITY_SELECTABLE) and are deliberately left set, so the frame stays
+           visible and click-selectable in the GUI viewport. Every camera that does not
+           set visibility_mask keeps the 0xFFFFFFFF default, which still matches bit 27,
+           so it still sees the frame.
+
+           The ONLY opt-in today is the camera in model://gimbal_invis, used by
+           model://x500_gimbal_lidar_invis (airframe 4026). model://gimbal is
+           deliberately left alone, so x500_gimbal and x500_gimbal_lidar keep seeing
+           their own frames. These flags are therefore inert for all 15 other x500
+           variants — mono_cam, OakD-Lite and optical_flow set no visibility_mask.
+           Purpose: the x500's T-bar landing gear sits 59.6 deg off nadir against a
+           57.3 deg camera half-FOV, so ~2 deg of roll drags a leg into frame. The legs
+           are baked into base_link_visual's mesh (the DAE's CarbonFiber node holds both
+           the frame arms and the leg tubes), so they cannot be hidden on their own
+           without re-cutting the mesh. Collisions are separate <collision> elements
+           below and are untouched: physics, contacts and landing behavior are unchanged. -->
       <visual name="base_link_visual">
         <pose>0 0 .025 0 0 3.141592654</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -29,6 +51,7 @@
       </visual>
       <visual name="5010_motor_base_0">
         <pose>0.174 0.174 .032 0 0 -.45</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -38,6 +61,7 @@
       </visual>
       <visual name="5010_motor_base_1">
         <pose>-0.174 0.174 .032 0 0 -.45</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -47,6 +71,7 @@
       </visual>
       <visual name="5010_motor_base_2">
         <pose>0.174 -0.174 .032 0 0 -.45</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -56,6 +81,7 @@
       </visual>
       <visual name="5010_motor_base_3">
         <pose>-0.174 -0.174 .032 0 0 -.45</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -65,6 +91,7 @@
       </visual>
       <visual name="NXP_FMUK66_FRONT">
         <pose>0.047 .001 .043 1 0 1.57</pose>
+        <visibility_flags>134217727</visibility_flags>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -84,6 +111,7 @@
       </visual>
       <visual name="NXP_FMUK66_TOP">
         <pose>-0.023 0 .0515 0 0 -1.57</pose>
+        <visibility_flags>134217727</visibility_flags>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
@@ -103,6 +131,7 @@
       </visual>
       <visual name="RDDRONE_FMUK66_TOP">
         <pose>-.03 0 .0515 0 0 -1.57</pose>
+        <visibility_flags>134217727</visibility_flags>
         <cast_shadows>false</cast_shadows>
         <geometry>
           <plane>
