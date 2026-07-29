@@ -1,0 +1,154 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <!-- 200x200 m grass ground: a 5x5 grid of 40 m grass_patch tiles, covering exactly
+       the (100,100) (-100,100) (100,-100) (-100,-100) square.
+
+       Visual only - it carries no collision. Pair it with the including world's
+       ground_plane, which supplies the contact surface; a second coplanar collision
+       plane causes contact jitter on touchdown.
+
+       Tiles are 40 m rather than one 200 m plane because grass_dry.png is 512px and
+       gz stretches it across the whole plane: 40 m gives ~13 px/m, a single 200 m
+       plane would give ~2.6 px/m. Tile yaws vary (multiples of 90 deg, so the square
+       footprint is unchanged) to keep the repeat from reading as a grid.
+
+       To resize, edit this file only - the worlds include it as a unit. -->
+  <model name="grass_ground">
+    <static>true</static>
+
+    <!-- y = -80 -->
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_0</name>
+      <pose>-80.000 -80.000 0.000 0.000 0.000 0.000</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_1</name>
+      <pose>-40.000 -80.000 0.000 0.000 0.000 3.142</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_2</name>
+      <pose>0.000 -80.000 0.000 0.000 0.000 1.571</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_3</name>
+      <pose>40.000 -80.000 0.000 0.000 0.000 4.712</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_4</name>
+      <pose>80.000 -80.000 0.000 0.000 0.000 3.142</pose>
+    </include>
+
+    <!-- y = -40 -->
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_5</name>
+      <pose>-80.000 -40.000 0.000 0.000 0.000 4.712</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_6</name>
+      <pose>-40.000 -40.000 0.000 0.000 0.000 1.571</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_7</name>
+      <pose>0.000 -40.000 0.000 0.000 0.000 0.000</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_8</name>
+      <pose>40.000 -40.000 0.000 0.000 0.000 3.142</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_9</name>
+      <pose>80.000 -40.000 0.000 0.000 0.000 1.571</pose>
+    </include>
+
+    <!-- y = 0 -->
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_10</name>
+      <pose>-80.000 0.000 0.000 0.000 0.000 3.142</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_11</name>
+      <pose>-40.000 0.000 0.000 0.000 0.000 0.000</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_12</name>
+      <pose>0.000 0.000 0.000 0.000 0.000 4.712</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_13</name>
+      <pose>40.000 0.000 0.000 0.000 0.000 1.571</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_14</name>
+      <pose>80.000 0.000 0.000 0.000 0.000 0.000</pose>
+    </include>
+
+    <!-- y = 40 -->
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_15</name>
+      <pose>-80.000 40.000 0.000 0.000 0.000 1.571</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_16</name>
+      <pose>-40.000 40.000 0.000 0.000 0.000 4.712</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_17</name>
+      <pose>0.000 40.000 0.000 0.000 0.000 3.142</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_18</name>
+      <pose>40.000 40.000 0.000 0.000 0.000 0.000</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_19</name>
+      <pose>80.000 40.000 0.000 0.000 0.000 4.712</pose>
+    </include>
+
+    <!-- y = 80 -->
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_20</name>
+      <pose>-80.000 80.000 0.000 0.000 0.000 0.000</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_21</name>
+      <pose>-40.000 80.000 0.000 0.000 0.000 1.571</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_22</name>
+      <pose>0.000 80.000 0.000 0.000 0.000 4.712</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_23</name>
+      <pose>40.000 80.000 0.000 0.000 0.000 3.142</pose>
+    </include>
+    <include>
+      <uri>model://grass_patch</uri>
+      <name>tile_24</name>
+      <pose>80.000 80.000 0.000 0.000 0.000 1.571</pose>
+    </include>
+  </model>
+</sdf>
