@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <!-- 40 m visual-only grass tile. Visual only on purpose: the worlds that use it
+       already carry a ground_plane whose (infinite) collision plane provides the
+       contact surface, and a second coplanar collision plane there causes contact
+       jitter on landing. Use grass_field instead when the tile must also collide.
+       40 m so a 3x3 grid lands on exactly 120x120 m (+/-60). -->
+  <model name="grass_patch">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual">
+        <cast_shadows>false</cast_shadows>
+        <geometry><plane><normal>0 0 1</normal><size>40 40</size></plane></geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://grass_field/materials/textures/grass_dry.png</albedo_map>
+              <normal_map>model://grass_field/materials/textures/grass_dry.png</normal_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
