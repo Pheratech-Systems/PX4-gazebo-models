@@ -8,7 +8,6 @@
     <!-- Gimbal (unchanged: keeps joint names + command topics the bridge uses) -->
     <include merge='true'>
       <uri>model://gimbal</uri>
-      <mass>0.0</mass>
       <pose>0.1 0 0.26 0 0 3.14</pose>
     </include>
     <joint name="GimbalAttachJoint" type="fixed">
