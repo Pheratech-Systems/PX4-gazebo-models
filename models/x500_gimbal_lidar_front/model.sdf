@@ -1,14 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sdf version='1.9'>
-  <model name='x500_gimbal_lidar'>
+  <!-- x500_gimbal_lidar_front - x500_gimbal_lidar with the gimbal moved 0.1 m forward.
+       Identical to x500_gimbal_lidar in every other respect; it mounts the same
+       model://gimbal, so this camera still sees its own airframe.
+
+       This exists to keep the forward-offset experiment out of x500_gimbal_lidar, which
+       is the baseline rig. KNOWN AND EXPECTED BEHAVIOUR, measured, do not treat as a bug:
+
+         - It jolts forward on takeoff. Moving the 0.4 kg gimbal 0.1 m forward on a
+           2.4653 kg vehicle shifts CG 16.2 mm, which PX4 does not know about: a
+           0.392 N.m steady pitch moment, 2.26 N of differential thrust = 9.3 % of hover
+           thrust held as permanent trim, and ~11.7 rad/s^2 of open-loop pitch until the
+           attitude integrator winds up.
+         - It barely helps the occlusion it was meant to fix: 2.00 deg -> 2.30 deg of
+           airframe roll before a T-bar leg enters frame. The rails run fore-aft at a
+           fixed |y| = 0.132, so translating the camera in X hardly changes the angle to
+           them; it does not break free until ~0.18-0.20 m, which is past the +-0.177 m
+           edge of the body plate.
+
+       If the offset is ever wanted without the trim cost, reduce the gimbal mass in a
+       DEDICATED gimbal model (mass 1e-4 / inertia 1e-7 per link is DART-clean and drops
+       the CG offset to 0.02 mm). Do NOT use mass 0.0 / inertia 0.0 - DART warns that a
+       zero-mass BodyNode "can cause invalid physical behavior or segfault", and zero
+       inertia on these PID-driven revolute joints is a singular mass matrix.
+       For the occlusion problem itself, prefer x500_gimbal_lidar_invis. -->
+  <model name='x500_gimbal_lidar_front'>
     <self_collide>false</self_collide>
 
     <include merge='true'><uri>model://x500</uri></include>
 
-    <!-- Gimbal (unchanged: keeps joint names + command topics the bridge uses) -->
+    <!-- Gimbal moved 0.1 m forward (the only difference from x500_gimbal_lidar).
+         Keeps joint names + command topics the bridge uses. -->
     <include merge='true'>
       <uri>model://gimbal</uri>
-      <pose>0 0 0.26 0 0 3.14</pose>
+      <pose>0.1 0 0.26 0 0 3.14</pose>
     </include>
     <joint name="GimbalAttachJoint" type="fixed">
       <parent>base_link</parent>
