@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version='1.9'>
+  <model name='x500_mono_cam_fpv'>
+    <self_collide>false</self_collide>
+
+    <!-- Geometry/mass only. We deliberately include x500_base rather than x500,
+         because x500 already carries its own MulticopterMotorModel plugins and a
+         second set declared here would ADD to them (double thrust), not override
+         them. Everything below re-declares the motor plugins with racing thrust. -->
+    <include merge='true'>
+      <uri>model://x500_base</uri>
+    </include>
+
+    <!-- Racing motors.
+         Delta vs. x500:
+           motorConstant   8.54858e-06 -> 3.05e-05  (thrust = k * omega^2)
+           timeConstantUp  0.0125      -> 0.005     (small props spool much faster)
+           timeConstantDown 0.025      -> 0.008
+         maxRotVelocity stays 1000 rad/s so SIM_GZ_EC_MIN/MAX inherited from
+         4001_gz_x500 still bracket the commanded range - only the thrust per
+         rad/s changes.
+         Mass is 2.0643 kg (base_link + 4 rotors) => 20.24 N.
+         Max thrust 4 * 3.05e-05 * 1000^2 = 122.0 N => thrust-to-weight 6.03.
+         Hover omega = sqrt(5.061 / 3.05e-05) = 407 rad/s => MPC_THR_HOVER 0.30. -->
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+      name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_0_joint</jointName>
+      <linkName>rotor_0</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.005</timeConstantUp>
+      <timeConstantDown>0.008</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>3.05e-05</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>0</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+      name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_1_joint</jointName>
+      <linkName>rotor_1</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.005</timeConstantUp>
+      <timeConstantDown>0.008</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>3.05e-05</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>1</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+      name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_2_joint</jointName>
+      <linkName>rotor_2</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.005</timeConstantUp>
+      <timeConstantDown>0.008</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>3.05e-05</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>2</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+      name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_3_joint</jointName>
+      <linkName>rotor_3</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.005</timeConstantUp>
+      <timeConstantDown>0.008</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>3.05e-05</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>3</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="MotorFailurePlugin"
+      name="gz::sim::systems::MotorFailureSystem">
+    </plugin>
+
+    <!-- FPV camera: mono_cam looks down its own +X. Pitch is about +Y, and a
+         POSITIVE pitch tilts +X toward -Z (that is why x500_mono_cam_down uses
+         +1.5707 for straight down). So an UPWARD tilt needs a NEGATIVE pitch:
+         -0.7854 rad = 45 deg up. Optical axis becomes (0.707, 0, +0.707).
+
+         Translation is in the parent model frame, in which base_link sits at
+         z = 0.24 (x500_base carries a root pose of 0 0 .24). So
+         "0.20 0 0.28" = 0.20 m ahead of and 0.04 m above base_link - i.e. in the
+         nose, ahead of the rotor plane at x = 0.174, which keeps the front props
+         outside the 99.7 deg horizontal FOV. -->
+    <include merge='true'>
+      <uri>model://mono_cam</uri>
+      <pose>0.20 0 0.28 0 -0.7854 0</pose>
+      <name>mono_cam</name>
+    </include>
+    <joint name="CameraJoint" type="fixed">
+      <parent>base_link</parent>
+      <child>camera_link</child>
+      <!-- Same mount, expressed relative to base_link, so z is 0.28 - 0.24. -->
+      <pose relative_to="base_link">0.20 0 0.04 0 -0.7854 0</pose>
+    </joint>
+  </model>
+</sdf>
