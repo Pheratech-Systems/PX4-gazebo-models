@@ -15,6 +15,9 @@
       <background>0.7 0.7 0.7 1</background>
       <shadows>true</shadows>
     </scene>
+    <!-- Flat collision ground (200x200). Visual = the grass_ground model below, as
+         in military_recon_mini.sdf; the plane carries no visual of its own so there
+         is nothing coplanar with the grass to z-fight against. -->
     <model name="ground_plane">
       <static>true</static>
       <link name="link">
@@ -22,7 +25,7 @@
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>1 1</size>
+              <size>200 200</size>
             </plane>
           </geometry>
           <surface>
@@ -33,19 +36,6 @@
             <contact/>
           </surface>
         </collision>
-        <visual name="visual">
-          <geometry>
-            <plane>
-              <normal>0 0 1</normal>
-              <size>500 500</size>
-            </plane>
-          </geometry>
-          <material>
-            <ambient>0.8 0.8 0.8 1</ambient>
-            <diffuse>0.8 0.8 0.8 1</diffuse>
-            <specular>0.8 0.8 0.8 1</specular>
-          </material>
-        </visual>
         <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <pose>0 0 0 0 -0 0</pose>
@@ -64,6 +54,16 @@
       <pose>0 0 0 0 -0 0</pose>
       <self_collide>false</self_collide>
     </model>
+
+    <!-- ================= GRASS GROUND: 200x200 m, i.e. the (100,100) (-100,100)
+         (100,-100) (-100,-100) square. The 5x5 grid of 40 m tiles lives inside the
+         grass_ground model - resize there, not here. ================= -->
+    <include>
+      <uri>model://grass_ground</uri>
+      <name>grass_ground</name>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+
     <light name="sunUTC" type="directional">
       <pose>0 0 500 0 -0 0</pose>
       <cast_shadows>true</cast_shadows>
