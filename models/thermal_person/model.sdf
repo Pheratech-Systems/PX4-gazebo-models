@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version='1.9'>
+  <!-- Adult human thermal target, ~1.79 m, upright, origin between the feet, facing +x.
+
+       WHY THE SEGMENTS HAVE DIFFERENT TEMPERATURES
+       A real LWIR search-and-rescue signature is not a uniform human-shaped blob. Skin
+       runs ~33-34 C, but clothing insulates: its outer surface settles far closer to
+       ambient, and extremities colder still. So a person reads as a bright head and
+       hands with a dim body - which is exactly what makes the detection problem
+       non-trivial, and exactly what a single-threshold detector gets wrong. A uniform
+       310 K mannequin would make every detector look good.
+
+       WHY THESE PARTICULAR NUMBERS
+       model://thermal_cam quantises heat sources to 2.57 K steps (ceiling/255 - see that
+       model's notes), so segment temperatures cannot be chosen freely. Two rules came
+       out of actually measuring it:
+
+         1. Command values that sit ON a grid centre (count * 2.57), not near a
+            boundary. Then the rendered value is exact and does not depend on how the
+            GPU rounds.
+         2. Space neighbours at least TWO counts apart. One count is not enough margin.
+
+       Rule 2 was learned the hard way: the first cut used 306.15 K hands and 307.15 K
+       head, only 1.0 K apart on a 2.57 K grid. Arithmetic said they would land on
+       counts 119 and 120; in the render BOTH came back as 305.83 K and the head
+       vanished as a distinct feature. A sub-step separation is a rounding accident, not
+       a design.
+
+         segment                 cmd K   count   reads K   vs 283.15 K ambient
+         boots                  287.84     112    287.84      +4.7
+         trousers / legs        292.98     114    292.98     +10.0
+         clothed torso, arms    298.12     116    298.12     +15.0
+         exposed hands          303.26     118    303.26     +20.1
+         head / face            308.40     120    308.40     +25.3
+
+       Commanded == rendered for all five, which is the point of rule 1. In C: boots
+       14.7, legs 19.8, torso 25.0, hands 30.1, face 35.2 - all plausible for a clothed
+       adult in 10 C air. If you retune these, move in whole steps of 2.57 K.
+
+       <static>true</static>: this is scenery, and it sidesteps the failure mode
+       thermal_cam has - a non-static model with mass and no collision falls through
+       the ground plane and the sensor goes uniform. -->
+  <model name='thermal_person'>
+    <static>true</static>
+    <pose>0 0 0 0 0 0</pose>
+
+    <link name="body">
+      <!-- One collision box for the whole torso+legs volume. Enough to stop a vehicle
+           flying through the target; the limbs are visual-only. -->
+      <collision name="collision">
+        <pose>0 0 0.85 0 0 0</pose>
+        <geometry>
+          <box><size>0.30 0.50 1.70</size></box>
+        </geometry>
+      </collision>
+
+      <!-- ===== BOOTS: 287.84 K, poorly perfused and in contact with cold ground ===== -->
+      <visual name="boot_left">
+        <pose>0.03 0.10 0.05 0 0 0</pose>
+        <geometry><box><size>0.26 0.11 0.10</size></box></geometry>
+        <material>
+          <ambient>0.05 0.04 0.03 1</ambient>
+          <diffuse>0.08 0.06 0.05 1</diffuse>
+        </material>
+        <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+          <temperature>287.84</temperature>
+        </plugin>
+      </visual>
+      <visual name="boot_right">
+        <pose>0.03 -0.10 0.05 0 0 0</pose>
+        <geometry><box><size>0.26 0.11 0.10</size></box></geometry>
+        <material>
+          <ambient>0.05 0.04 0.03 1</ambient>
+          <diffuse>0.08 0.06 0.05 1</diffuse>
+        </material>
+        <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+          <temperature>287.84</temperature>
+        </plugin>
+      </visual>
+
+      <!-- ===== LEGS: 292.98 K, trouser surface ===== -->
+      <visual name="leg_left">
+        <pose>0 0.10 0.50 0 0 0</pose>
+        <geometry><cylinder><radius>0.075</radius><length>0.80</length></cylinder></geometry>
+        <material>
+          <ambient>0.12 0.14 0.20 1</ambient>
+          <diffuse>0.18 0.21 0.30 1</diffuse>
+        </material>
+        <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+          <temperature>292.98</temperature>
+        </plugin>
+      </visual>
+      <visual name="leg_right">
+        <pose>0 -0.10 0.50 0 0 0</pose>
+        <geometry><cylinder><radius>0.075</radius><length>0.80</length></cylinder></geometry>
+        <material>
+          <ambient>0.12 0.14 0.20 1</ambient>
+          <diffuse>0.18 0.21 0.30 1</diffuse>
+        </material>
+        <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+          <temperature>292.98</temperature>
+        </plugin>
+      </visual>
+
+      <!-- ===== TORSO + UPPER ARMS: 298.12 K, jacket surface ===== -->
+      <visual name="torso">
+        <pose>0 0 1.20 0 0 0</pose>
+        <geometry><box><size>0.26 0.42 0.62</size></box></geometry>
+        <material>
+          <ambient>0.20 0.09 0.05 1</ambient>
+          <diffuse>0.35 0.15 0.08 1</diffuse>
+        </material>
+        <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+          <temperature>298.12</temperature>
+        </plugin>
+      </visual>
+      <visual name="upper_arm_left">
+        <pose>0 0.255 1.30 0 0 0</pose>
+        <geometry><cylinder><radius>0.052</radius><length>0.32</length></cylinder></geometry>
+        <material>
+          <ambient>0.20 0.09 0.05 1</ambient>
+          <diffuse>0.35 0.15 0.08 1</diffuse>
+        </material>
+        <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+          <temperature>298.12</temperature>
+        </plugin>
+      </visual>
+      <visual name="upper_arm_right">
+        <pose>0 -0.255 1.30 0 0 0</pose>
+        <geometry><cylinder><radius>0.052</radius><length>0.32</length></cylinder></geometry>
+        <material>
+          <ambient>0.20 0.09 0.05 1</ambient>
+          <diffuse>0.35 0.15 0.08 1</diffuse>
+        </material>
+        <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+          <temperature>298.12</temperature>
+        </plugin>
+      </visual>
+
+      <!-- ===== FOREARMS + HANDS: 303.26 K, bare skin ===== -->
+      <visual name="forearm_left">
+        <pose>0 0.255 1.00 0 0 0</pose>
+        <geometry><cylinder><radius>0.045</radius><length>0.30</length></cylinder></geometry>
+        <material>
+          <ambient>0.45 0.32 0.24 1</ambient>
+          <diffuse>0.72 0.53 0.40 1</diffuse>
+        </material>
+        <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+          <temperature>303.26</temperature>
+        </plugin>
+      </visual>
+      <visual name="forearm_right">
+        <pose>0 -0.255 1.00 0 0 0</pose>
+        <geometry><cylinder><radius>0.045</radius><length>0.30</length></cylinder></geometry>
+        <material>
+          <ambient>0.45 0.32 0.24 1</ambient>
+          <diffuse>0.72 0.53 0.40 1</diffuse>
+        </material>
+        <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+          <temperature>303.26</temperature>
+        </plugin>
+      </visual>
+
+      <!-- ===== NECK + HEAD: 308.40 K, the hottest segment. From nadir this is the
+                 top of the head, and it is often the ONLY segment that clears the
+                 torso silhouette - see the nadir note at the end of this file. ===== -->
+      <visual name="neck">
+        <pose>0 0 1.55 0 0 0</pose>
+        <geometry><cylinder><radius>0.048</radius><length>0.08</length></cylinder></geometry>
+        <material>
+          <ambient>0.45 0.32 0.24 1</ambient>
+          <diffuse>0.72 0.53 0.40 1</diffuse>
+        </material>
+        <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+          <temperature>308.40</temperature>
+        </plugin>
+      </visual>
+      <visual name="head">
+        <pose>0 0 1.685 0 0 0</pose>
+        <geometry><sphere><radius>0.105</radius></sphere></geometry>
+        <material>
+          <ambient>0.45 0.32 0.24 1</ambient>
+          <diffuse>0.72 0.53 0.40 1</diffuse>
+        </material>
+        <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+          <temperature>308.40</temperature>
+        </plugin>
+      </visual>
+    </link>
+
+    <!-- WHAT A NADIR CAMERA ACTUALLY SEES, measured at 20 m AGL with thermal_cam
+         (18.65 m across 320 px, so ~58 mm/px and a whole standing adult is ~30 px):
+
+           torso / shoulders   ~30 px    the bulk of the signature
+           head                ~12 px    clears the torso outline, hottest
+           hands                few px   forearms sit at y=+/-0.255 and the torso is
+                                         only 0.21 half-wide, so barely a sliver shows
+           legs, boots         0-1 px    directly underneath the torso, occluded
+
+         So from straight above, this is a torso blob with a hot dot on it, and the leg
+         and boot temperatures are effectively unused. They matter for an oblique or
+         ground-level view. Do not tune the leg/boot values against a nadir image -
+         you will be tuning something you cannot see. -->
+  </model>
+</sdf>
