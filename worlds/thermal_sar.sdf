@@ -1,0 +1,249 @@
+<?xml version="1.0" ?>
+<!--
+  thermal_sar - dawn search-and-rescue scene for model://thermal_cam.
+
+  Four thermal_person targets on a straight corridor along y=0, at x = 8, 20, 32, 44,
+  under INCREASING canopy cover. The point of the world is the gradient, not the
+  scenery: a detector that finds P1 and misses P4 has told you where its limit is,
+  which a single randomly-forested scene cannot.
+
+      P1  x=8    open ground, nothing within 7 m        positive control
+      P2  x=20   under an oak drip line, offset 4.2 m   partial overhead cover
+      P3  x=32   directly beneath an oak centre         full overhead cover
+      P4  x=44   oak overhead + a ring of 6 pines       overhead AND slant-view blocked
+
+  The corridor (|y| < 3.2) and a 7 m circle at the origin are deliberately kept clear of
+  trees, so a vehicle can spawn at 0,0 and fly straight down the line without weaving.
+
+  Sweep it with:  x from 0 to 52 along y=0, 15-25 m AGL, camera nadir.
+
+  MEASURED at 20 m AGL nadir, ambient 283.15 K (see .worklog/thermal-cam.md):
+      P1  165 px above ambient, head reads 308.40 K   found
+      P2   98 px above ambient, head reads 308.40 K   found
+      P3    0 px above ambient - frame is EXACTLY uniform  fully occluded
+      P4    0 px above ambient - frame is EXACTLY uniform  fully occluded
+  So nadir-only search finds P1 and P2 and cannot find P3 or P4 at all. That is the
+  intended result, not a bug in the scene: it is the case that motivates flying an
+  oblique/gimballed look rather than straight down.
+
+  Like every other PX4 world here, this file declares NO system plugins - PX4 supplies
+  physics/sensors/etc from Tools/simulation/gz/server.config. A bare
+  `gz sim worlds/thermal_sar.sdf` therefore renders no camera output; add the
+  sensors-system plugin yourself if you want to drive it outside PX4.
+-->
+<sdf version="1.9">
+  <world name="thermal_sar">
+    <physics type="ode">
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+
+    <!-- ===================== ATMOSPHERE: THE AMBIENT TEMPERATURE =====================
+         This, NOT the gz-sim-thermal-system plugin, is what sets the world's ambient.
+         The two do different jobs and both are needed:
+           <atmosphere><temperature>      -> the temperature EVERY visual renders at
+                                             unless it is explicitly a heat source
+           gz-sim-thermal-system on a
+           <visual>                       -> makes that ONE visual a heat source
+         So the plugin cannot set the ambient, and the atmosphere cannot make a target.
+         The heat sources here live in model://thermal_person.
+
+         283.15 K = 10 C, a dawn temperature, chosen deliberately: contrast against a
+         ~307 K head is what makes a target findable, so a cold ambient is the easy case
+         and a hot afternoon is the hard one. Raise this toward 305 K to see detection
+         degrade - that is the most useful single knob in this file.
+
+         temperature_gradient IS 0, AND THAT IS NOT PHYSICAL - it is deliberate.
+         gz spreads the gradient across the camera's whole near..far clip rather than
+         across the actual scene depth. thermal_cam has far=3000 m, so a realistic
+         -0.0065 K/m becomes a ~19.5 K ramp painted across the image (measured: an
+         earlier rig read background 9.09 K below its commanded ambient). The person's
+         whole head signature is +25 K, so a physical gradient would put a background
+         artefact on the same order as the target and make measured contrast meaningless.
+         Zero gives a flat, trustworthy ambient. If you want the gradient back, drop the
+         camera's far clip to ~100 m first, which limits the ramp to ~0.65 K. -->
+    <atmosphere type="adiabatic">
+      <temperature>283.15</temperature>
+      <temperature_gradient>0</temperature_gradient>
+    </atmosphere>
+
+    <scene>
+      <grid>false</grid>
+      <ambient>0.35 0.38 0.42 1</ambient>
+      <background>0.55 0.62 0.72 1</background>
+      <shadows>true</shadows>
+    </scene>
+
+    <!-- Low, warm-tinted sun: dawn. Only affects the RGB view - the thermal pass takes
+         its temperatures from the atmosphere and the thermal plugins, not from lighting.
+         Worth knowing: you cannot make something hot by shining a light on it here. -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 12 0 0 0</pose>
+      <diffuse>0.9 0.82 0.7 1</diffuse>
+      <specular>0.15 0.15 0.15 1</specular>
+      <attenuation>
+        <range>2000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.7 0.35 -0.4</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>200 200</size></plane></geometry>
+          <surface>
+            <friction><ode><mu>1</mu><mu2>1</mu2></ode></friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>200 200</size></plane></geometry>
+          <material>
+            <ambient>0.16 0.22 0.12 1</ambient>
+            <diffuse>0.22 0.30 0.16 1</diffuse>
+            <specular>0.02 0.02 0.02 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================== TARGETS =====================
+         P1, P3 and P4 stand; P2 is supine, which exercises the model's documented
+         rotation (pitch -1.5708, z lifted by the body half-thickness so it rests on the
+         ground instead of intersecting it, head toward -x). Only P2 is supine because
+         pose turned out to affect nadir cover more than the trees do - see the note on
+         P4 below. -->
+
+    <include>
+      <uri>model://thermal_person</uri>
+      <name>P1_open_standing</name>
+      <pose>8 0 0 0 0 1.2</pose>
+    </include>
+
+    <include>
+      <uri>model://thermal_person</uri>
+      <name>P2_edge_supine</name>
+      <pose>20 0 0.13 0 -1.5708 0.6</pose>
+    </include>
+
+    <include>
+      <uri>model://thermal_person</uri>
+      <name>P3_under_oak_standing</name>
+      <pose>32 0 0 0 0 -2.1</pose>
+    </include>
+
+    <!-- P4 stands rather than lying down, and that is a measurement decision, not a
+         style one. It was supine at first, and a supine body is ~1.7 m long, so it
+         reached out past the oak canopy centre and leaked 19 warm pixels to a nadir
+         camera - MORE than P3, which is supposed to be the easier of the two. Standing
+         keeps P4's footprint compact, so P3 and P4 are both fully covered from directly
+         above and the difference between them is purely the pine ring, which blocks
+         OBLIQUE lines of sight and not the nadir one. Pose stays varied via P2. -->
+    <include>
+      <uri>model://thermal_person</uri>
+      <name>P4_dense_standing</name>
+      <pose>44 0 0 0 0 2.4</pose>
+    </include>
+
+    <!-- A boulder holding yesterday's heat, at 290.41 K: a warm-but-not-human distractor
+         ~7 K above ambient, where a head is +25 K. The value is deliberately INSIDE the
+         person's cold-segment band (between the 287.84 K boots and the 292.98 K legs),
+         which is what makes it a real distractor rather than a decoration - it cannot be
+         separated from a human extremity by temperature alone, only by shape and
+         context. Anything that flags this as a person is thresholding, not detecting.
+         290.41 K is a grid centre (count 113), so it renders exactly.
+
+         The plugin has to live on this visual because a temperature cannot be attached
+         to an <include>d model from out here - that is why the people are a local model
+         and the trees, which need no temperature, can stay Fuel includes. -->
+    <model name="warm_boulder">
+      <static>true</static>
+      <pose>11.5 2.6 0.35 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><sphere><radius>0.35</radius></sphere></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><sphere><radius>0.35</radius></sphere></geometry>
+          <material>
+            <ambient>0.28 0.27 0.25 1</ambient>
+            <diffuse>0.38 0.37 0.35 1</diffuse>
+          </material>
+          <plugin filename="gz-sim-thermal-system" name="gz::sim::systems::Thermal">
+            <temperature>290.41</temperature>
+          </plugin>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================== CANOPY =====================
+         Fuel models, same as worlds/forest.sdf already does - but on the CURRENT domain
+         (fuel.gazebosim.org). forest.sdf still points at fuel.ignitionrobotics.org,
+         which is deprecated; both resolve today and both cache under ~/.gz/fuel, so a
+         first load of this world needs network even though the old paths are cached.
+         Only two distinct models are fetched no matter how many instances.
+
+         Oak is ~6.6 m tall with a ~10.6 m canopy spread; pine is ~5.1 m and ~3.2 m.
+         (The DAE vertices are in inches with a 0.0254 node scale - do not read the raw
+         mesh extents as metres.) The oak spread is what makes full overhead cover
+         possible at all; a pine is too narrow to hide anyone from directly above.
+
+         Trees are visual-only heat-wise: no thermal plugin, so foliage and bark sit at
+         the 283.15 K ambient. That is correct - vegetation really does track ambient -
+         and it means the trees occlude without adding a competing signature. -->
+
+    <!-- designed cover, one group per station -->
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak Tree</uri><name>cover_P2_oak</name><pose>24.2 1.0 0 0 0 0.47</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak Tree</uri><name>cover_P3_oak</name><pose>32.0 0.0 0 0 0 1.31</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak Tree</uri><name>cover_P4_oak</name><pose>44.0 0.0 0 0 0 4.0</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>cover_P4_pine_0</name><pose>47.0 0.0 0 0 0 0.1</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>cover_P4_pine_1</name><pose>45.5 2.6 0 0 0 2.32</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>cover_P4_pine_2</name><pose>42.5 2.6 0 0 0 3.91</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>cover_P4_pine_3</name><pose>41.0 0.0 0 0 0 0.8</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>cover_P4_pine_4</name><pose>42.5 -2.6 0 0 0 3.69</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>cover_P4_pine_5</name><pose>45.5 -2.6 0 0 0 5.23</pose></include>
+
+    <!-- background forest: makes the scene a forest rather than four lonely trees.
+         Generated with a fixed seed and filtered to keep the corridor and the spawn
+         circle clear, so the layout is reproducible - do not "tidy" these by hand. -->
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_0</name><pose>31.79 10.55 0 0 0 0.85</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_1</name><pose>20.8 -12.9 0 0 0 2.42</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_2</name><pose>42.58 6.96 0 0 0 3.94</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_3</name><pose>21.18 8.6 0 0 0 1.95</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_4</name><pose>3.45 -17.46 0 0 0 1.43</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_5</name><pose>-2.21 -16.72 0 0 0 3.83</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_6</name><pose>13.58 3.27 0 0 0 4.56</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak Tree</uri><name>bg_oak_7</name><pose>25.15 5.05 0 0 0 1.0</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_8</name><pose>-5.72 -14.94 0 0 0 3.95</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_9</name><pose>10.69 17.92 0 0 0 3.48</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_10</name><pose>36.47 -6.65 0 0 0 4.31</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_11</name><pose>24.77 -16.93 0 0 0 2.44</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_12</name><pose>51.48 12.5 0 0 0 3.03</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_13</name><pose>6.81 15.37 0 0 0 0.49</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak Tree</uri><name>bg_oak_14</name><pose>22.2 17.29 0 0 0 0.3</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak Tree</uri><name>bg_oak_15</name><pose>5.91 6.3 0 0 0 0.68</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_16</name><pose>51.84 9.29 0 0 0 3.22</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_17</name><pose>2.08 7.45 0 0 0 1.6</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_18</name><pose>-2.41 10.69 0 0 0 4.65</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_19</name><pose>34.92 -11.22 0 0 0 2.46</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_20</name><pose>6.77 -8.29 0 0 0 2.64</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_21</name><pose>12.25 13.86 0 0 0 5.68</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_22</name><pose>20.49 -17.66 0 0 0 3.08</pose></include>
+    <include><uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Pine Tree</uri><name>bg_pine_23</name><pose>13.74 -7.33 0 0 0 3.27</pose></include>
+
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>47.397971057728974</latitude_deg>
+      <longitude_deg>8.546163739800146</longitude_deg>
+      <elevation>0</elevation>
+    </spherical_coordinates>
+  </world>
+</sdf>
