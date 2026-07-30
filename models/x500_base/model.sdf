@@ -357,6 +357,7 @@
       </inertial>
       <visual name="rotor_0_visual">
         <pose>-0.022 -0.14638461538461536 -0.016 0 0 0</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>0.8461538461538461 0.8461538461538461 0.8461538461538461</scale>
@@ -372,6 +373,7 @@
       </visual>
       <visual name="rotor_0_visual_motor_bell">
         <pose>0 0 -.032 0 0 0</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -429,6 +431,7 @@
       </inertial>
       <visual name="rotor_1_visual">
         <pose>-0.022 -0.14638461538461536 -0.016 0 0 0</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>0.8461538461538461 0.8461538461538461 0.8461538461538461</scale>
@@ -444,6 +447,7 @@
       </visual>
       <visual name="rotor_1_visual_motor_top">
         <pose>0 0 -.032 0 0 0</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -501,6 +505,7 @@
       </inertial>
       <visual name="rotor_2_visual">
         <pose>-0.022 -0.14638461538461536 -0.016 0 0 0</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>0.8461538461538461 0.8461538461538461 0.8461538461538461</scale>
@@ -516,6 +521,7 @@
       </visual>
       <visual name="rotor_2_visual_motor_top">
         <pose>0 0 -.032 0 0 0</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -573,6 +579,7 @@
       </inertial>
       <visual name="rotor_3_visual">
         <pose>-0.022 -0.14638461538461536 -0.016 0 0 0</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>0.8461538461538461 0.8461538461538461 0.8461538461538461</scale>
@@ -588,6 +595,7 @@
       </visual>
       <visual name="rotor_3_visual_motor_top">
         <pose>0 0 -.032 0 0 0</pose>
+        <visibility_flags>134217727</visibility_flags>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>

@@ -60,6 +60,11 @@
             <near>0.1</near>
             <far>3000</far>
           </clip>
+          <!-- Bit 27 (0x08000000). The x500_base airframe visuals clear this bit
+               in their <visibility_flags>. Collisions are untouched, so contacts and
+               landing behavior are unchanged.
+               Rationale and the numbers behind it: models/x500_base/model.sdf. -->
+          <visibility_mask>134217728</visibility_mask>
         </camera>
         <always_on>1</always_on>
         <update_rate>30</update_rate>
