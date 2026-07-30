@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version='1.9'>
+  <model name='thermal_cam'>
+    <pose>0 0 0 0 0 0</pose>
+    <self_collide>false</self_collide>
+    <static>false</static>
+    <!-- Named thermal_camera_link, NOT camera_link, and the distinction matters.
+         DART flattens an entire vehicle model into one Skeleton and names its BodyNodes
+         by the UNSCOPED leaf link name. So when this model is carried by a vehicle that
+         also mounts model://gimbal - which owns a link called camera_link - SDF-level
+         scoping (thermal::camera_link) is not enough: both arrive at DART as camera_link
+         and it auto-renames the second, logging
+             [NameManager::issueNewName] The name [camera_link] is a duplicate,
+             so it has been renamed to [camera_link(1)]
+         That still launches and the gz topics are unaffected, because gz addresses
+         entities by ID and builds topic paths from the SDF scope. But a silently
+         renamed body is a bad thing to leave in a log, and the (1) suffix is assigned by
+         load order rather than by anything stable. A unique name here removes the whole
+         class of problem. Matches the lidar_sensor_link naming style in
+         model://x500_gimbal_lidar_thermal. -->
+    <link name="thermal_camera_link">
+      <inertial>
+        <pose>0.02 0 0 0 0 0</pose>
+        <!-- 1 g, deliberately negligible rather than realistic. This replaced a 50 g
+             mass-matched-to-mono_cam value, and the reason for the change is where this
+             camera ended up: mono_cam parity only mattered while the two were swapped at
+             the same rigid frame mount point. This model's actual home is the gimbal
+             END-EFFECTOR, downstream of three revolute joints, where added mass loads the
+             gimbal and shifts CG rather than just riding along. A sensor should not be a
+             dynamics input.
+
+             1 g and not 0 g: a dynamic link needs a positive-definite inertia tensor, and
+             exactly-zero mass gives the solver a singular mass matrix. Whether that is
+             tolerated depends on whether the engine merges fixed-joint links, which is an
+             implementation detail not worth betting on. 1 g on a ~2.4 kg vehicle is 0.04%
+             — four orders of magnitude down, dynamically indistinguishable from zero.
+
+             These exact numbers match lidar_sensor_link in
+             model://x500_gimbal_lidar_thermal, which is already a 1 g stub on this same
+             gimbal end-effector and known to work — so this is a proven value here, not a
+             guess.
+
+             Inertia is 1e-5, ABOVE the true geometric value (~3e-7 for a 1 g box of this
+             size). Padded on purpose, same as the lidar stub: very small inertias make the
+             solver stiff, and over-estimating a welded stub's inertia adds <0.05% to the
+             airframe's Ixx, which is not measurable. Do not "correct" it downward. -->
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.00001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00001</iyy>
+          <iyz>0</iyz>
+          <izz>0.00001</izz>
+        </inertia>
+      </inertial>
+      <visual name="thermal_cam/visual/housing">
+        <geometry>
+          <box>
+            <size>0.025 0.045 0.045</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.15 0.15 0.17 1</ambient>
+          <diffuse>0.15 0.15 0.17 1</diffuse>
+          <specular>0.2 0.2 0.2 1</specular>
+        </material>
+      </visual>
+      <visual name="thermal_cam/visual/lens">
+        <pose>0.018 0 0 0 1.5707 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.011</radius>
+            <length>0.012</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.08 0.08 0.08 1</ambient>
+          <diffuse>0.08 0.08 0.08 1</diffuse>
+          <specular>0.3 0.3 0.3 1</specular>
+        </material>
+      </visual>
+      <visual name="thermal_cam/visual/lens_glass">
+        <!-- Germanium LWIR windows look like a dark gold mirror, not blue glass. This
+             is the one visual difference from mono_cam that matters when you are
+             eyeballing which camera a model actually has. -->
+        <pose>0.0235 0 0 0 1.5707 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.0105</radius>
+            <length>0.001</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.35 0.28 0.10 1</ambient>
+          <diffuse>0.45 0.36 0.13 1</diffuse>
+          <specular>0.9 0.8 0.5 1</specular>
+          <emissive>0 0 0 1</emissive>
+        </material>
+      </visual>
+
+      <sensor name="thermal_camera" type="thermal">
+        <gz_frame_id>thermal_camera_link</gz_frame_id>
+        <pose>0 0 0 0 0 0</pose>
+        <camera>
+          <!-- Boson 320 with the 4.3 mm lens: 50 deg HFOV, 320x256 (the real focal
+               plane array is 256 rows, not the 240 the gz demo world uses). -->
+          <horizontal_fov>0.8727</horizontal_fov>
+          <image>
+            <width>320</width>
+            <height>256</height>
+            <!-- L16 -> gz publishes L_INT16, i.e. mono16. See the mapping note below
+                 for why this is 16-bit and not the 8-bit the gz demo world uses. -->
+            <format>L16</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>3000</far>
+          </clip>
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>30</update_rate>
+        <visualize>true</visualize>
+
+        <!-- No <topic> on purpose. gz then publishes on the entity-scoped default,
+             /world/<world>/model/<vehicle>/link/.../sensor/thermal_camera/image, which
+             stays unique when multi-vehicle SITL appends _0/_1 to the model name. The
+             gz demo world (/usr/share/gz/gz-sim8/worlds/thermal_camera.sdf) hardcodes
+             <topic>thermal_camera_8bit/image</topic>; copying that would make every
+             vehicle instance publish onto one shared topic. -->
+
+        <!-- NO <visibility_mask> HERE, AND ADDING ONE WOULD NOT WORK. The fork's
+             hide-the-airframe trick (x500_base clears bit 27 on its airframe visuals,
+             gimbal_invis's camera sets <visibility_mask>134217728</visibility_mask> to
+             opt in) has NO EFFECT on a thermal sensor. Measured against an RGB positive
+             control in the same scene, same pose, same target: the RGB camera with the
+             mask correctly stopped seeing a bit-27-cleared visual, both thermal cameras
+             still saw it. So when this camera is mounted on an x500, the frame and the
+             T-bar landing gear WILL appear in the thermal image and cannot be masked
+             out - they render at ambient, so they are low-contrast against the
+             background but they do occlude anything behind them. Fix it with camera
+             placement, not with visibility flags. -->
+
+        <!-- Harmonic name is gz-sim-thermal-sensor-system. Ignition-era docs and
+             snippets say ignition-gazebo-thermal-sensor-system, which does not exist
+             here - it fails to load and you silently get the plugin defaults. -->
+        <plugin
+          filename="gz-sim-thermal-sensor-system"
+          name="gz::sim::systems::ThermalSensor">
+          <!-- HOW THE PIXEL VALUE MAPS TO TEMPERATURE. From
+               gz-rendering8/ogre2/media/materials/programs/GLSL/thermal_camera_fs.glsl:
+                   temp  = clamp(temp, min_temp, max_temp)
+                   pixel = temp / resolution
+               min_temp/max_temp are CLAMPS ONLY - not an offset - so pixel 0 is 0 K,
+               not min_temp. Decoding is therefore:
+                   kelvin = pixel * resolution
+               With resolution 0.01 that is centi-Kelvin: 288.15 K -> 28815.
+               gz-sensors prints the same thing for 8-bit: "output range = [0, 255*3] K".
+
+               CEILING: pixel saturates at (2^bits - 1), so the hottest representable
+               temperature is (2^bits - 1) * resolution = 65535 * 0.01 = 655.35 K. That
+               is why max_temp is 655.35 and not a rounder number - a higher max_temp
+               would clamp above what the format can hold and flat-top the hottest
+               targets instead of reporting them. Measured: a 900 K source reads 65535
+               exactly, i.e. it saturates rather than wrapping.
+
+               DO NOT READ 0.01 AS THE ACCURACY. Measured on this model, a heat source's
+               temperature is quantised to 8 bits of [0, ceiling] before it ever reaches
+               the 16-bit output, because the shader smuggles it through the red channel
+               of an 8-bit colour target. Effective step for heat sources is therefore
+                   ceiling / 255 = 257 * resolution = 2.57 K here,
+               NOT 0.01 K. Verified exactly: commanding 300 / 310 / 400 K yields
+               30069 / 31097 / 40092, which is round(T/ceiling*255)/255*ceiling to the
+               count. Only the ambient and depth shading keeps true 16-bit precision
+               (a 288.15 K ambient reads 28811, off the heat-source grid).
+
+               Consequence for picking numbers: heat-source resolution is set by the
+               CEILING, so buying headroom costs precision. resolution 0.02 reaches
+               1310.7 K for open flame but steps at 5.14 K; resolution 0.005 steps at
+               1.29 K but saturates at 327.7 K, which is fine for people and useless for
+               engines. 0.01 is the compromise - people (~310 K) sit ~9 steps above a
+               288 K ambient, and everything short of flame is still on scale. Change
+               resolution and max_temp together or the top of the range is a lie. -->
+          <min_temp>253.15</min_temp>
+          <max_temp>655.35</max_temp>
+          <resolution>0.01</resolution>
+        </plugin>
+      </sensor>
+      <gravity>true</gravity>
+      <velocity_decay />
+    </link>
+  </model>
+</sdf>
