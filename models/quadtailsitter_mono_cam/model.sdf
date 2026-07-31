@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<sdf version='1.10'>
+  <model name='quadtailsitter_mono_cam'>
+    <include merge='true'>
+      <uri>model://quadtailsitter</uri>
+    </include>
+
+    <!-- Nose camera. base_link sits at model z=0.4 and the body mesh spans
+         link z=-0.195..+0.307, so the nose tip is at model z=0.707; 0.72 puts the
+         housing just clear of it, and y=+0.06 keeps it beside the pitot at
+         (0 0 0.7) instead of inside it.
+
+         Pitch -1.57 aligns the camera's +X boresight with base_link +Z, which is
+         the tailsitter's nose - same convention as the airspeed include, and as
+         <forward>0 0 1</forward> in the AdvancedLiftDrag plugin. So the camera
+         looks at the sky in hover and at the horizon after forward transition. -->
+    <include merge='true'>
+      <uri>model://mono_cam</uri>
+      <pose>0 0.06 0.72 0 -1.57 0</pose>
+      <name>mono_cam</name>
+    </include>
+    <joint name="CameraJoint" type="fixed">
+      <parent>base_link</parent>
+      <child>camera_link</child>
+      <pose relative_to="base_link">0 0.06 0.32 0 -1.57 0</pose>
+    </joint>
+  </model>
+</sdf>
