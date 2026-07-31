@@ -16,7 +16,7 @@
          looks at the sky in hover and at the horizon after forward transition. -->
     <include merge='true'>
       <uri>model://mono_cam</uri>
-      <pose>0 0.06 0.72 0 -1.57 0</pose>
+      <pose>0.06 0.0 0.7 0 -1.57 0</pose>
       <name>mono_cam</name>
     </include>
     <joint name="CameraJoint" type="fixed">
