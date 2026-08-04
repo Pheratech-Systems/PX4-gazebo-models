@@ -130,11 +130,12 @@
              vehicle instance publish onto one shared topic. -->
 
         <!-- NO <visibility_mask> HERE, AND ADDING ONE WOULD NOT WORK. The fork's
-             hide-the-airframe trick (x500_base clears bit 27 on its airframe visuals,
-             gimbal_invis's camera sets <visibility_mask>134217728</visibility_mask> to
-             opt in) has NO EFFECT on a thermal sensor. Measured against an RGB positive
-             control in the same scene, same pose, same target: the RGB camera with the
-             mask correctly stopped seeing a bit-27-cleared visual, both thermal cameras
+             hide-the-airframe trick (x500_base sets flags 0x08000003 on its airframe
+             visuals, gimbal_invis's camera sets
+             <visibility_mask>134217724</visibility_mask> to opt in) has NO EFFECT on a
+             thermal sensor. Measured against an RGB positive control in the same scene,
+             same pose, same target: the RGB camera with the mask correctly stopped
+             seeing the airframe visual, both thermal cameras
              still saw it. So when this camera is mounted on an x500, the frame and the
              T-bar landing gear WILL appear in the thermal image and cannot be masked
              out - they render at ambient, so they are low-contrast against the

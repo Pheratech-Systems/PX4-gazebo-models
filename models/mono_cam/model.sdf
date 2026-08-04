@@ -60,11 +60,16 @@
             <near>0.1</near>
             <far>3000</far>
           </clip>
-          <!-- Bit 27 (0x08000000). The x500_base airframe visuals clear this bit
-               in their <visibility_flags>. Collisions are untouched, so contacts and
-               landing behavior are unchanged.
+          <!-- 0x07FFFFFC, bits 2..26. The x500_base airframe visuals set flags
+               0x08000003 (bit 27 + the two GUI bits), which shares no bit with this
+               mask, so the frame is hidden here but stays visible and selectable in
+               the GUI. Everything else keeps the 0xFFFFFFFF default and is seen
+               normally — including particle emitters, which cannot set
+               visibility_flags at all and so must be let through by a wide mask.
+               Collisions are untouched, so contacts and landing behavior are
+               unchanged.
                Rationale and the numbers behind it: models/x500_base/model.sdf. -->
-          <visibility_mask>134217728</visibility_mask>
+          <visibility_mask>134217724</visibility_mask>
         </camera>
         <always_on>1</always_on>
         <update_rate>30</update_rate>

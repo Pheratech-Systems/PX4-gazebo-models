@@ -4,10 +4,11 @@
        from the gimbal camera's image.
 
        Same as x500_gimbal_lidar except it mounts model://gimbal_invis instead of
-       model://gimbal. That gimbal's camera sets <visibility_mask> to bit 27, and the
-       x500_base airframe visuals clear that bit, so the frame and its T-bar landing
-       gear are not rendered into this camera. x500_gimbal and x500_gimbal_lidar are
-       untouched and still see their own frames.
+       model://gimbal. That gimbal's camera sets <visibility_mask> to bits 2..26
+       (0x07FFFFFC), and the x500_base airframe visuals set flags 0x08000003 (bit 27
+       plus the two GUI bits), which share no bit with the mask — so the frame and its
+       T-bar landing gear are not rendered into this camera. x500_gimbal and
+       x500_gimbal_lidar are untouched and still see their own frames.
 
        The legs still exist physically - they are separate <collision> elements in
        x500_base - so ground contact, landing and the flight model are unchanged. -->
