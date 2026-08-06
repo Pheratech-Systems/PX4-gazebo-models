@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version='1.9'>
+  <model name='rover_ackermann_mono_cam'>
+    <include merge='true'>
+      <uri>model://rover_ackermann</uri>
+    </include>
+
+    <!-- Forward-looking deck camera. rover_ackermann's base_link sits at model
+         z=0.1 and its body visual is offset -0.05 from base_link, so mesh z maps
+         to model z + 0.05. The mesh's flat cargo deck tops out at mesh z=0.20
+         over x=0.24..0.26 (model z=0.25), and the four roll-cage posts stand at
+         x=-0.40 / x=+0.20, y=+-0.245, up to mesh z=0.30 (model z=0.35).
+
+         So (0.25, 0, 0.27) puts the 0.04 m housing flat on the deck centreline,
+         just forward of the front pair of posts - nothing in the cage occludes
+         the view. No rotation: the camera's +X boresight is already the rover's
+         forward axis. The hood ahead of it peaks at model z=0.25, below the lens,
+         so it sits in the bottom of frame the way a real bonnet-mounted camera
+         does. -->
+    <include merge='true'>
+      <uri>model://mono_cam</uri>
+      <pose>0.25 0 0.27 0 0 0</pose>
+      <name>mono_cam</name>
+    </include>
+    <joint name="CameraJoint" type="fixed">
+      <parent>base_link</parent>
+      <child>camera_link</child>
+      <pose relative_to="base_link">0.25 0 0.17 0 0 0</pose>
+    </joint>
+  </model>
+</sdf>
