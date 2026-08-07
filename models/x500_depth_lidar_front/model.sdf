@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version='1.9'>
+  <!-- x500_depth_lidar_front - x500_depth with the forward-facing single-point lidar
+       from x500_lidar_front added.
+
+       Both sensor blocks are copied verbatim from those two models so that this rig is
+       behaviourally identical to each of them taken alone:
+
+         - OakD-Lite depth camera at .12 .03 .242 (from x500_depth)
+         - LW20 rangefinder body at .15 0 .01, sensor ray along +X (from x500_lidar_front)
+
+       The link name lidar_sensor_link and the sensor name lidar are REQUIRED: gz_bridge
+       subscribes to the fixed topic
+         /world/<world>/model/<model>/link/lidar_sensor_link/sensor/lidar/scan
+       (GZBridge.cpp) and publishes it as distance_sensor. Renaming either silently kills
+       the rangefinder with only a PX4_WARN at startup.
+
+       The LW20 sits 0.23 m below the depth camera and only 0.03 m ahead of it, so it is
+       well outside the camera's downward FOV and does not appear in the depth image.
+
+       Note the upstream quirk kept from x500_lidar_front: lidar_sensor_link's own pose is
+       0.3 m forward, but the sensor's <pose> is re-specified relative_to base_link at
+       .15 0 .01, so the ray actually originates at 0.15 m. The link pose is inert. -->
+  <model name='x500_depth_lidar_front'>
+    <include merge='true'>
+      <uri>x500</uri>
+    </include>
+
+    <!-- Depth camera - identical mount to x500_depth. -->
+    <include merge='true'>
+      <uri>model://OakD-Lite</uri>
+      <pose>.12 .03 .242 0 0 0</pose>
+    </include>
+    <joint name="CameraJoint" type="fixed">
+      <parent>base_link</parent>
+      <child>camera_link</child>
+      <pose relative_to="base_link">.12 .03 .242 0 0 0</pose>
+    </joint>
+
+    <!-- Forward lidar - identical mount to x500_lidar_front. -->
+    <include merge='true'>
+      <uri>model://LW20</uri>
+      <pose relative_to="base_link">.15 0 .01 0 0 0</pose>
+    </include>
+    <joint name="lidar_model_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>lw20_link</child>
+      <pose relative_to="base_link">-0 0 0 0 0 0</pose>
+    </joint>
+    <link name="lidar_sensor_link">
+      <pose relative_to="base_link">0.3 0 0.01 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>0.00001</ixx>
+          <iyy>0.00001</iyy>
+          <izz>0.00001</izz>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+        </inertia>
+      </inertial>
+      <sensor name='lidar' type='gpu_lidar'>
+        <gz_frame_id>lidar_sensor_link</gz_frame_id>
+        <pose relative_to="base_link">.15 0 .01 1.57 0 0</pose>
+        <update_rate>50</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>1</samples>
+              <resolution>1</resolution>
+              <min_angle>0</min_angle>
+              <max_angle>0</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>1</samples>
+              <resolution>1</resolution>
+              <min_angle>0</min_angle>
+              <max_angle>0</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.1</min>
+            <max>100.0</max>
+            <resolution>0.01</resolution>
+          </range>
+        </ray>
+        <always_on>1</always_on>
+        <visualize>true</visualize>
+      </sensor>
+    </link>
+    <joint name="lidar_sensor_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>lidar_sensor_link</child>
+    </joint>
+  </model>
+</sdf>
