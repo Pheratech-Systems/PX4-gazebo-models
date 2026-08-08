@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version='1.9'>
+  <!-- x500_full_mono_cams - x500 with five model://mono_cam instances giving full
+       coverage: forward, aft, down, left and right.
+
+       ================ FRAME CONVENTION - READ BEFORE MOVING A CAMERA ================
+       This is the gz model frame, which is FLU (x forward, y LEFT, z up), NOT PX4's
+       FRD body frame. Confirmed against x500_base, not assumed: rotor_0 is PX4 motor 1
+       (front-right) and sits at (0.174, -0.174), so -Y is the RIGHT side of the
+       vehicle and +Y is the LEFT. cam_left is therefore at +y and cam_right at -y.
+       If you read these poses as if y were PX4's +y=right, left and right are swapped.
+
+       ================ WHY NESTED INCLUDES AND NOT merge='true' ================
+       model://mono_cam names its link camera_link. Five of them under
+       <include merge='true'> would be five links called camera_link in one model, which
+       is a hard name collision, so merge is not an option here without forking the
+       sensor definition five times. Nested (non-merge) includes with a distinct <name>
+       scope each one, exactly as x500_gimbal_lidar_thermal does for thermal_cam, and
+       keep mono_cam as the single source of truth for the sensor config (FOV,
+       resolution, and the visibility_mask below) - retuning mono_cam once updates all
+       five here and every other vehicle that carries it.
+
+       Cost of nesting, and it is the thing you will actually trip on: each camera's
+       topic gains a model/<name> level, so the image topics are
+         /world/<world>/model/x500_full_mono_cams_0/model/cam_front/link/camera_link/sensor/camera/image
+       and likewise for cam_aft / cam_down / cam_left / cam_right. They are distinct per
+       camera, which is the point, but they are NOT the flat path the single-camera
+       x500_mono_cam produces - anything hardcoding that path needs updating.
+
+       Known cosmetic wart, inherited and not fixable from here: DART flattens the
+       vehicle into one Skeleton and names BodyNodes by UNSCOPED leaf name, so five
+       links all called camera_link produce duplicate-name auto-renames in the Gazebo
+       log at spawn. SDF-level scoping still resolves the joints correctly (each joint
+       names its child as <scope>::camera_link), so this is log noise, not a broken
+       mount. The real fix is a rename inside mono_cam, which would be an upstream-owned
+       change affecting every mono_cam vehicle - deliberately not done here.
+
+       ================ MOUNTS ================
+       All five poses are relative_to base_link, NOT the model frame. This matters:
+       x500_base carries a root pose of 0 0 .24, so a model-frame z of .10 is actually
+       -0.14 relative to base_link. x500_mono_cam / x500_mono_cam_down mix the two
+       frames between their <include> pose and their joint pose; stating relative_to
+       explicitly on every camera here avoids that whole class of mistake.
+
+       Reference geometry from x500_base, relative to base_link:
+         body plate    0.3536 x 0.3536 x 0.05 box at z=0.007, so edges at +-0.1768
+         rotors        x,y = +-0.174 at z=0.032
+         landing gear  legs at y=+-0.098, T-bar rails at y=+-0.132, z=-0.2195
+       The four side cameras sit at +-0.18, just outboard of the plate edge, at plate
+       mid-height. cam_down sits 32 mm below the plate underside (z=-0.018) and well
+       clear of the T-bar.
+
+       Rotation: mono_cam looks down its own +X. Yaw sends that axis around the vehicle;
+       a POSITIVE pitch tilts +X toward -Z, which is why straight down is +1.5708 (same
+       sign convention as x500_mono_cam_down).
+
+       Airframe occlusion is a non-issue: mono_cam sets
+       <visibility_mask>134217724</visibility_mask>, so the x500 frame, arms, props and
+       landing gear are hidden from all five cameras. That is what makes the tight
+       +-0.18 mounts usable despite the 1.74 rad (99.7 deg) horizontal FOV.
+
+       PERFORMANCE: five 1280x960 cameras at 30 Hz is ~184 Mpx/s of rendering, 5x what
+       x500_mono_cam costs. MEASURED on the dev machine this was authored on: RTF held
+       0.998-1.000 in the default world, headless, so it is not automatically a problem.
+       Treat that as one data point and not a guarantee - it is the first thing to check
+       on weaker GPU, with a heavier world, or under multi-vehicle SITL. If you need
+       coverage rather than resolution, fork a lower-resolution camera model rather than
+       moving these mounts. -->
+  <model name='x500_full_mono_cams'>
+    <self_collide>false</self_collide>
+
+    <include merge='true'>
+      <uri>model://x500</uri>
+    </include>
+
+    <!-- Forward: +X, no rotation. -->
+    <include>
+      <uri>model://mono_cam</uri>
+      <name>cam_front</name>
+      <pose relative_to="base_link">0.18 0 0.01 0 0 0</pose>
+    </include>
+    <joint name="cam_front_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>cam_front::camera_link</child>
+    </joint>
+
+    <!-- Aft: yaw 180 deg puts +X along -X of the vehicle. -->
+    <include>
+      <uri>model://mono_cam</uri>
+      <name>cam_aft</name>
+      <pose relative_to="base_link">-0.18 0 0.01 0 0 3.14159</pose>
+    </include>
+    <joint name="cam_aft_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>cam_aft::camera_link</child>
+    </joint>
+
+    <!-- Left: +Y. Yaw +90 deg. See the frame note above - +Y is left in FLU. -->
+    <include>
+      <uri>model://mono_cam</uri>
+      <name>cam_left</name>
+      <pose relative_to="base_link">0 0.1 0.01 0 0 1.5708</pose>
+    </include>
+    <joint name="cam_left_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>cam_left::camera_link</child>
+    </joint>
+
+    <!-- Right: -Y. Yaw -90 deg. -->
+    <include>
+      <uri>model://mono_cam</uri>
+      <name>cam_right</name>
+      <pose relative_to="base_link">0 -0.1 0.01 0 0 -1.5708</pose>
+    </include>
+    <joint name="cam_right_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>cam_right::camera_link</child>
+    </joint>
+
+    <!-- Down: pitch +90 deg tilts +X to -Z. 32 mm below the plate underside. -->
+    <include>
+      <uri>model://mono_cam</uri>
+      <name>cam_down</name>
+      <pose relative_to="base_link">0 0 -0.05 0 1.5708 0</pose>
+    </include>
+    <joint name="cam_down_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>cam_down::camera_link</child>
+    </joint>
+  </model>
+</sdf>
