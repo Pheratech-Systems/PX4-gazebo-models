@@ -40,7 +40,7 @@
     <!-- Forward lidar - identical mount to x500_lidar_front. -->
     <include merge='true'>
       <uri>model://LW20</uri>
-      <pose relative_to="base_link">.15 0 .01 0 0 0</pose>
+      <pose relative_to="base_link">.15 0 -0.05 0 0 0</pose>
     </include>
     <joint name="lidar_model_joint" type="fixed">
       <parent>base_link</parent>
