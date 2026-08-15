@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version='1.9'>
+  <model name='x500_parachute_payload'>
+    <self_collide>false</self_collide>
+
+    <include merge='true'>
+      <uri>x500</uri>
+    </include>
+
+    <!-- Parachute payload: the mortar round with its canopy STOWED.
+         mortar_chute merges detailed_mortar, so its link is called "link" and
+         the DetachableJoint below resolves. (model://parachute_package does not
+         work here - its links are "base_link" and "parachute_small::chute", so
+         <child_link>link</child_link> would find nothing, the joint would never
+         be created, and the payload would fall off at spawn.)
+
+         The 3.14 pitch carries the round nose-down, which puts the canopy -
+         built along mortar_chute's -Z - pointing up. While stowed the canopy has
+         no collision, no drag, and is held transparent by custom::ParachuteSystem,
+         so it neither touches, slows nor hides the vehicle. -->
+    <include>
+      <uri>model://mortar_chute</uri>
+      <name>parachute_payload</name>
+      <pose>0.1 0 0.25 0 3.14 0</pose>
+    </include>
+
+    <!-- Holds the payload rigidly until detach message arrives -->
+    <plugin filename="gz-sim-detachable-joint-system"
+            name="gz::sim::systems::DetachableJoint">
+      <parent_link>base_link</parent_link>
+      <child_model>parachute_payload</child_model>
+      <child_link>link</child_link>
+    </plugin>
+  </model>
+</sdf>
