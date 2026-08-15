@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Gazebo wrapper around drone.dae. drone.urdf next to it is the RViz-side
+  consumer of the same mesh and is left untouched; this file is the gz-sim one.
+
+  MESH FRAME
+
+  The SolidWorks export is referenced to a bbox corner, not a real origin:
+  raw bounds run 0 -> +extent on all three axes, and the file is tagged Y_UP.
+    bbox min    = [0.0000, 0.0000, 0.0001]
+    bbox max    = [0.4733, 0.1314, 0.4744]   (mesh axes, Y is up)
+    bbox centre = [0.2367, 0.0657, 0.2373]
+  There is no <unit meter="..."> in the .dae, so gz reads it as metres - the
+  0.47 m span across the arms is already correct and <scale> stays 1 1 1.
+
+  UP-AXIS AND THE VISUAL POSE
+
+  gz-common's ColladaLoader honours <up_axis>, so it applies the Y_UP -> Z_UP
+  rotation (+90 deg about X) itself before gz-sim ever sees the vertices. The
+  pose below therefore only has to do what is left over from drone.urdf's
+  rpy="1.5708 0 -1.5708": the -90 deg yaw, plus the translation that pulls the
+  corner-referenced mesh back onto base_link.
+
+  >>> IF THE DRONE RENDERS STANDING ON ITS EDGE, the loader did NOT convert
+  >>> Y_UP. Fix by rolling it here - change the visual pose rpy to
+  >>>     1.5708 0 -1.5708
+  >>> and leave xyz alone; the translation is identical either way. This is the
+  >>> same failure mode, and the same fix, that drone.urdf documents for RViz.
+
+  base_link sits where drone.urdf puts it, so Gazebo and RViz agree: 0.037 m
+  aft of the mesh's geometric centre in x, centred in y, and level with the
+  underside of the frame in z (mesh bottom at z=0). That x offset is inherited
+  deliberately - do not "correct" it to 0.2372 without also changing the URDF,
+  or the bag-replay view and the sim view will stop matching.
+
+  NO MATERIAL TAG, ON PURPOSE
+
+  prep_mesh.py baked face colours into the .dae. A <material> here would
+  override them and render the airframe flat grey - same reason drone.urdf
+  omits one on its visual.
+
+  WHAT THIS MODEL IS NOT
+
+  There are no rotor links, joints, MulticopterMotorModel plugins or sensors,
+  so this cannot fly and is not a PX4 airframe yet. The inertial is a box
+  inertia over the bounding box at a guessed 1.5 kg mass - a placeholder to
+  keep the physics solver happy while the model rests on the ground, NOT a
+  measured value. Replace it before this ever backs an airframe file.
+  For a purely visual spawn (no falling, no contacts), set <static>true</static>.
+-->
+<sdf version='1.9'>
+  <model name='indoor_dev_drone'>
+    <pose>0 0 0 0 0 0</pose>
+    <self_collide>false</self_collide>
+    <static>false</static>
+
+    <link name='base_link'>
+      <!-- Placeholder. Pose is the mesh bbox centre expressed in base_link. -->
+      <inertial>
+        <pose>-0.0373 0.0005 0.0657 0 0 0</pose>
+        <mass>1.5</mass>
+        <inertia>
+          <ixx>0.030151</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.030288</iyy>
+          <iyz>0</iyz>
+          <izz>0.056119</izz>
+        </inertia>
+      </inertial>
+      <gravity>true</gravity>
+      <velocity_decay />
+
+      <visual name='base_link_visual'>
+        <pose>0.2 0.2372 0 1.5708 0 -1.5708</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://indoor_dev_drone/drone.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <!-- Bounding box of the mesh, not a hull: 13 MB of triangles is far too
+           much to hand the collision engine, and the arms are open frame so a
+           convex hull would be a box anyway. Extents are the measured bbox
+           mapped through the visual rotation (mesh z -> x, mesh x -> y,
+           mesh y -> z), centred on the same bbox centre as the inertial. -->
+      <collision name='base_link_collision'>
+        <pose>-0.0373 0.0005 0.0657 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.4744 0.4733 0.1315</size>
+          </box>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+  </model>
+</sdf>
