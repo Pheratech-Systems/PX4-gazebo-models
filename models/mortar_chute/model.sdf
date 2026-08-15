@@ -39,7 +39,10 @@
     <link name='canopy'>
       <pose>0 0 -0.02 3.14159 0 0</pose>
       <inertial>
-        <pose>0 0 0.625 0 0 0</pose>
+        <!-- CoM at the link origin, NOT at the canopy centroid. The plugin's
+             <cp> is the offset from the CoM to the aerodynamic centre and is
+             the only lever; putting the CoM out at the centroid too would
+             double the restoring torque. -->
         <mass>0.02</mass>
         <inertia>
           <ixx>0.0002</ixx>
