@@ -7,16 +7,37 @@
   plugin, acting on that link; this model exists purely so there is nothing to
   see until the chute actually opens.
 
-  Why a spawned model rather than a visual hidden inside mortar_chute: toggling
-  a visual's Transparency / VisualCmd at runtime does not reach the renderer in
+  Why a spawned model rather than a visual hidden inside the payload: toggling a
+  visual's Transparency / VisualCmd at runtime does not reach the renderer in
   gz-sim 8 - the canopy stays visible on the drone the whole flight. Creating
   the entity is the only way to change what is drawn that does not depend on
   renderer behaviour.
+
+  Why this is NOT <static> even though it is only a visual: gz-sim excludes
+  static models from /world/<w>/dynamic_pose/info, which is the per-iteration
+  pose stream the GUI actually follows. A static model therefore renders at the
+  pose it spawned with and NEVER MOVES ON SCREEN, however faithfully its Pose
+  component is updated - the canopy hangs in the air while the payload descends
+  under it. Measured: with <static>, the canopy moved 32.4 m in pose/info and was
+  absent from dynamic_pose/info entirely.
+
+  So it is a dynamic body instead, made inert by construction rather than by the
+  static flag: no collision, gravity off, and 1 g of mass. The plugin owns its
+  pose outright via SetWorldPoseCmd every update.
 -->
 <sdf version="1.9">
   <model name="parachute_canopy">
-    <static>true</static>
     <link name="link">
+      <gravity>false</gravity>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>1e-6</ixx>
+          <iyy>1e-6</iyy>
+          <izz>1e-6</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
       <visual name="canopy_visual">
         <geometry>
           <mesh>
