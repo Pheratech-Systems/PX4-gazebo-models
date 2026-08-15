@@ -7,19 +7,23 @@
       <uri>x500</uri>
     </include>
 
-    <!-- Parachute payload: the mortar round with its canopy STOWED.
-         mortar_chute merges detailed_mortar, so its link is called "link" and
-         the DetachableJoint below resolves. (model://parachute_package does not
-         work here - its links are "base_link" and "parachute_small::chute", so
-         <child_link>link</child_link> would find nothing, the joint would never
-         be created, and the payload would fall off at spawn.)
+    <!-- Parachute payload: the supply crate with its canopy STOWED.
+         crate_chute names its link "link", so the DetachableJoint below
+         resolves. (model://parachute_package does NOT work here - its links are
+         "base_link" and "parachute_small::chute", so <child_link>link</child_link>
+         would find nothing, the joint would never be created, and the payload
+         would fall off at spawn.)
 
-         The 3.14 pitch carries the round nose-down, which puts the canopy -
-         built along mortar_chute's -Z - pointing up. While stowed the canopy has
-         no collision, no drag, and is held transparent by custom::ParachuteSystem,
-         so it neither touches, slows nor hides the vehicle. -->
+         Swap this uri for model://mortar_chute to get the mortar round back -
+         it exposes the same "link", so nothing else here changes. The mortar
+         carries a contact sensor and is scored by payload_impact_scorer.py;
+         the crate deliberately is not.
+
+         The 3.14 pitch turns crate_chute's -Z, which the canopy is built along,
+         into world up. While stowed the canopy has no collision, no drag and no
+         visual at all, so it neither touches, slows nor hides the vehicle. -->
     <include>
-      <uri>model://mortar_chute</uri>
+      <uri>model://crate_chute</uri>
       <name>parachute_payload</name>
       <pose>0.1 0 0.25 0 3.14 0</pose>
     </include>
