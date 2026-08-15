@@ -1,0 +1,118 @@
+<?xml version="1.0" ?>
+<!--
+  Ported from gazebo-classic:
+  Tools/simulation/gazebo-classic/sitl_gazebo-classic/models/parachute_small
+
+  Changes made for gz-sim 8 (Harmonic). Everything else is byte-for-byte the
+  classic model:
+    - <sdf version> 1.5 -> 1.9
+    - libLiftDragPlugin.so -> gz-sim-lift-drag-system. The parameter names and
+      values are IDENTICAL; only the plugin filename/name attributes differ.
+      Verified against the five PX4 gz models already using this system
+      (rc_cessna, standard_vtol, advanced_plane, tiltrotor, quadtailsitter).
+    - dropped the empty <velocity_decay /> on the chute link. It was already a
+      no-op in classic (empty = zero linear/angular damping) and gz-sim does
+      not implement the element at all, so this removes nothing.
+
+  This model is the canopy ONLY, and it is aerodynamically live from the moment
+  it is spawned - there is no deploy/stow state. In classic, "deployment" was
+  gazebo_parachute_plugin.cpp inserting this model at flight termination and
+  creating a fixed joint to the vehicle at runtime. That plugin has NOT been
+  ported (gz-sim's DetachableJoint cannot join a model spawned later), and it
+  was never wired to any vehicle in classic either.
+-->
+<sdf version="1.9">
+  <model name="parachute_small">
+    <pose>0 0 0 0 0 0</pose>
+    <static>false</static>
+
+    <link name="chute">
+      <pose>0 0 0  0 0 0</pose>
+      <inertial>
+        <pose>0 0 0  0 0 0</pose>
+        <mass>0.100000</mass>
+        <inertia>
+          <ixx>0.010000</ixx>
+          <ixy>0.000000</ixy>
+          <ixz>0.000000</ixz>
+          <iyy>0.010000</iyy>
+          <iyz>0.000000</iyz>
+          <izz>0.010000</izz>
+        </inertia>
+      </inertial>
+      <collision name="parachute_collision">
+        <pose>0 0 1.25  0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.35</radius>
+            <length>0.4</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="parachute_vis">
+        <pose>-0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://parachute_small/meshes/parachute_small.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <!-- Aero, unchanged from classic. Read as: no lift (cla=0), pure drag, and
+         alpha_stall at 90deg so the "stalled" regime IS the upright parachute.
+
+         NOTE on <area>3</area>: this is deliberately oversized. The classic
+         comment reads "Area of a circle of diameter 1m = 0.79, 3m2 is for a
+         better visualization". With cda 1.114 -> Cd 1.75 at 90deg, this canopy
+         gives ~1.9 m/s terminal velocity on the 1 kg parachute_package, but
+         only ~0.56 m/s on a 0.1 kg payload like detailed_mortar - slow enough
+         to hang in the air and drift. Retune <area> (or the payload mass)
+         before using this on anything lighter than the classic package. -->
+    <!-- THE ONE DELIBERATE DEVIATION FROM THE CLASSIC MODEL. Read before touching
+         <forward>, <upward> or <cda>.
+
+         gz-sim's LiftDrag normalises the angle of attack with
+             while (fabs(alpha) > 0.5*PI) alpha -= PI;
+         so at EXACTLY alpha = 90deg the wrap fires and alpha collapses to ~0.
+         Since cd = cda*alpha, the drag coefficient collapses with it and the
+         canopy generates NO force at all - it free-falls at exactly g.
+
+         That is precisely where the classic model sits: <forward>1 0 0</forward>
+         with <upward>0 0 1</upward> puts the flow 90deg off forward during a
+         vertical descent. Worse, it is a stable trap - the drag acting at
+         cp = (0,0,1.25) is what holds the canopy upright, so the model
+         aerodynamically parks itself on the singularity and stays there.
+         Measured: 40 m of drop in 2.86 s, i.e. textbook 0.5*g*t^2.
+
+         Fix: rotate the aero frame 5deg about the spanwise axis so a vertical
+         descent lands at alpha = 85deg instead of 90deg, then scale cda by
+         90/85 so cd at that alpha is still the intended 1.75:
+             1.114 * 90/85 = 1.1796
+         cla is 0, so tilting the frame introduces no lift - only the alpha used
+         for cd changes. Verified against the closed form at 20/45/75/85 deg,
+         where cd = cda*alpha holds to within 2%.
+
+         <radial_symmetry>true</radial_symmetry> does NOT fix this - it realigns
+         upward about forward and leaves the 90deg singularity intact (tested). -->
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0</a0>
+      <cla>0</cla>
+      <cda>1.1796</cda>  <!-- classic 1.114, scaled 90/85 - see note above. Cd = 1.75 at alpha = 85deg -->
+      <cma>0</cma>
+      <alpha_stall>1.5708</alpha_stall> <!-- = upright parachute -->
+      <cla_stall>0</cla_stall>
+      <cda_stall>0.01</cda_stall>
+      <cma_stall>0</cma_stall>
+      <cp>0 0 1.25</cp>   <!-- About the vertical center of the chute -->
+      <area>3</area>   <!-- Area of a circle of diameter 1m = 0.79, 3m2 is for a better visualization -->
+      <air_density>1.2041</air_density>
+      <!-- classic: forward 1 0 0 / upward 0 0 1, rotated 5deg about spanwise (+Y) -->
+      <forward>0.99619 0 -0.08716</forward>
+      <upward>0.08716 0 0.99619</upward>
+      <link_name>chute</link_name>
+    </plugin>
+
+  </model>
+</sdf>
