@@ -14,7 +14,7 @@
   inflates over <open_time> -> steady descent at ~3 m/s.
 
   The link that the carrier's DetachableJoint grabs is still called "link" (it
-  comes from detailed_mortar via a merged include), so x500_parachute_payload's
+  comes from detailed_mortar via a merged include), so x500_parachute_package's
   <child_link>link</child_link> needs no change.
 -->
 <sdf version='1.9'>
@@ -29,7 +29,7 @@
     <!-- Canopy.
          Rotated 180deg about X so the canopy's own +Z (the mesh grows upward
          from its origin) points along the round's -Z. The round is carried
-         nose-down (x500_parachute_payload includes it with pitch 3.14), so the
+         nose-down (x500_parachute_package includes it with pitch 3.14), so the
          round's -Z is world UP and the chute streams off the TAIL, which is
          what a real retarded munition does.
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sdf version='1.9'>
-  <model name='x500_parachute_payload'>
+  <model name='x500_parachute_package'>
     <self_collide>false</self_collide>
 
     <include merge='true'>
