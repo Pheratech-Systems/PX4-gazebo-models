@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Droppable mortar round with a parachute that deploys on a timer after release.
+
+  The canopy is jointed to the round from the moment the model LOADS - nothing
+  is spawned or jointed at runtime, because gz-sim cannot create a joint between
+  two independently spawned models from outside a system plugin. What is gated
+  is the aerodynamics: custom::ParachuteSystem applies no force at all until the
+  trigger fires, so the canopy rides along as 0.02 kg of dead mass and does not
+  perturb the carrier in flight.
+
+  Sequence: gripper RELEASE -> gz_bridge publishes .../detachable_joint/detach
+  -> DetachableJoint drops this model -> free fall for <deploy_delay> -> canopy
+  inflates over <open_time> -> steady descent at ~3 m/s.
+
+  The link that the carrier's DetachableJoint grabs is still called "link" (it
+  comes from detailed_mortar via a merged include), so x500_parachute_payload's
+  <child_link>link</child_link> needs no change.
+-->
+<sdf version='1.9'>
+  <model name='mortar_chute'>
+
+    <!-- The round itself. Merged, so its link keeps the name "link" and its
+         payload_contact sensor keeps working for payload_impact_scorer.py. -->
+    <include merge='true'>
+      <uri>model://detailed_mortar</uri>
+    </include>
+
+    <!-- Canopy.
+         Rotated 180deg about X so the canopy's own +Z (the mesh grows upward
+         from its origin) points along the round's -Z. The round is carried
+         nose-down (x500_parachute_payload includes it with pitch 3.14), so the
+         round's -Z is world UP and the chute streams off the TAIL, which is
+         what a real retarded munition does.
+
+         No <collision> on purpose: while stowed the canopy geometry overlaps
+         the carrier, and a collision there would have the payload fighting the
+         drone it is attached to. Drag comes from the plugin, not from contact. -->
+    <link name='canopy'>
+      <pose>0 0 -0.02 3.14159 0 0</pose>
+      <inertial>
+        <pose>0 0 0.625 0 0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <iyy>0.0002</iyy>
+          <izz>0.0004</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <visual name='canopy_visual'>
+        <geometry>
+          <mesh>
+            <!-- Mesh reused from the ported parachute_small. At 0.5 the canopy
+                 centroid lands at z = 0.625 (classic 1.25), which is what <cp>
+                 below has to match. -->
+            <uri>model://parachute_small/meshes/parachute_small.dae</uri>
+            <scale>0.5 0.5 0.5</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name='riser' type='fixed'>
+      <parent>link</parent>
+      <child>canopy</child>
+    </joint>
+
+    <!-- area 0.12 m^2 at cd 1.75 gives ~3.05 m/s on this 0.12 kg package
+         (0.1 round + 0.02 canopy):
+             v = sqrt(2*m*g / (rho*cd*A)) = sqrt(2*0.12*9.81 / (1.2041*1.75*0.12))
+         Retune <area> if detailed_mortar's mass ever changes - it is 0.1 kg
+         "for easier sitl", not the 1.36 kg of a real 60 mm round. -->
+    <plugin filename="libParachuteSystem.so" name="custom::ParachuteSystem">
+      <canopy_link>canopy</canopy_link>
+      <canopy_visual>canopy_visual</canopy_visual>
+      <cd>1.75</cd>
+      <area>0.12</area>
+      <air_density>1.2041</air_density>
+      <cp>0 0 0.625</cp>
+      <deploy_delay>1.5</deploy_delay>
+      <open_time>0.4</open_time>
+      <hide_until_deploy>true</hide_until_deploy>
+    </plugin>
+
+  </model>
+</sdf>
