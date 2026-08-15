@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.9">
+  <world name="soldier">
+    <physics type="ode">
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type="adiabatic"/>
+
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>true</shadows>
+    </scene>
+
+    <light name="sun" type="directional">
+      <pose>0 0 10 0 0 0</pose>
+      <cast_shadows>true</cast_shadows>
+      <intensity>1</intensity>
+      <direction>-0.5 0.1 -0.9</direction>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.5 0.5 0.5 1</specular>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <!-- tan / sand (#D2B48C). Specular is kept well below the diffuse
+               so the ground reads as matte dirt rather than wet sand - a
+               high specular on a 100 m plane blows out the downward camera
+               wherever the sun angle happens to mirror into it. -->
+          <material>
+            <ambient>0.82 0.71 0.55 1</ambient>
+            <diffuse>0.82 0.71 0.55 1</diffuse>
+            <specular>0.15 0.13 0.10 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ================================================================
+         gz-sim 8 reliably plays ONE animation per actor, so we use two
+         single-animation actors instead of one that switches:
+           * soldier_patrol  - paces a 50 m line back and forth along Y,
+                               offset 40 m out on +X, well clear of origin
+           * soldier_sentry  - stands guard, idle-breathing in place
+         Both skins come from Walking.dae (mesh + mixamorig_ skeleton).
+         Every waypoint carries roll = pi/2 (1.5708) to stand the Y-up
+         Mixamo mesh upright. Upright facing yaws:
+           +X = 1.5708 | +Y = 3.1416 | -X = 4.7124 | -Y = 6.2832
+         ================================================================ -->
+
+    <!-- ===== PATROLLING SOLDIER ===== -->
+    <actor name="soldier_patrol">
+      <skin>
+        <filename>model://soldier_walking/Walking.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walking">
+        <filename>model://soldier_walking/Walking.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0.0</delay_start>
+        <auto_start>true</auto_start>
+        <!-- Back and forth along x=40 between (40,-25) and (40,25) - a 50 m
+             leg, 40 s each way at the same 1.25 m/s, so the stride still
+             matches the animation and only the length changed. 1 s 180-deg
+             about-face at each end; 82 s round trip. Yaw only ever increases
+             (3.1416 -> 6.2832 -> 9.4248 = 3.1416 + 2pi) so the loop restart
+             is continuous and he never snap-turns. -->
+        <trajectory id="0" type="walking">
+          <waypoint><time>0.0</time>  <pose>40 -25 1 1.5708 0 3.1416</pose></waypoint>
+          <waypoint><time>40.0</time> <pose>40  25 1 1.5708 0 3.1416</pose></waypoint>
+          <waypoint><time>41.0</time> <pose>40  25 1 1.5708 0 6.2832</pose></waypoint>
+          <waypoint><time>81.0</time> <pose>40 -25 1 1.5708 0 6.2832</pose></waypoint>
+          <waypoint><time>82.0</time> <pose>40 -25 1 1.5708 0 9.4248</pose></waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+    <!-- ===== STANDING SENTRY ===== -->
+    <!-- NOTE: these Mixamo DAEs have NO named animation clip, so trajectory
+         'type' never matches and gz-sim falls back to the SKIN's built-in
+         animation. That's the real control: skin = StandingIdle.dae here so
+         his default (and only) motion is the idle. -->
+    <actor name="soldier_sentry">
+      <skin>
+        <filename>model://soldier_standing/StandingIdle.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="standing">
+        <filename>model://soldier_standing/StandingIdle.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0.0</delay_start>
+        <auto_start>true</auto_start>
+        <!-- stands at (-10,0), facing +X toward the patrol line at x=40
+             (yaw 1.5708) flipped when the patrol moved off the origin -->
+        <trajectory id="0" type="standing">
+          <waypoint><time>0</time>  <pose>-10 0 1 1.5708 0 1.5708</pose></waypoint>
+          <waypoint><time>10</time> <pose>-10 0 1 1.5708 0 1.5708</pose></waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+  </world>
+</sdf>
