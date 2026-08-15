@@ -48,17 +48,12 @@
           <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
         </inertia>
       </inertial>
-      <visual name='canopy_visual'>
-        <geometry>
-          <mesh>
-            <!-- Mesh reused from the ported parachute_small. At 0.5 the canopy
-                 centroid lands at z = 0.625 (classic 1.25), which is what <cp>
-                 below has to match. -->
-            <uri>model://parachute_small/meshes/parachute_small.dae</uri>
-            <scale>0.5 0.5 0.5</scale>
-          </mesh>
-        </geometry>
-      </visual>
+      <!-- Deliberately NO <visual> here. The canopy mesh lives in
+           model://parachute_canopy, which the plugin spawns on deploy and then
+           drives onto this link. Putting the mesh here and hiding it does not
+           work: a runtime Transparency / VisualCmd change never reaches the
+           gz-sim 8 renderer, so the canopy stays visible on the drone for the
+           whole flight. This link is physics only. -->
     </link>
 
     <joint name='riser' type='fixed'>
@@ -73,7 +68,9 @@
          "for easier sitl", not the 1.36 kg of a real 60 mm round. -->
     <plugin filename="libParachuteSystem.so" name="custom::ParachuteSystem">
       <canopy_link>canopy</canopy_link>
-      <canopy_visual>canopy_visual</canopy_visual>
+      <!-- Spawned on deploy and pose-driven onto canopy_link. Leave empty to
+           run without any canopy mesh (drag is unaffected). -->
+      <canopy_model>parachute_canopy</canopy_model>
       <cd>1.75</cd>
       <area>0.12</area>
       <air_density>1.2041</air_density>

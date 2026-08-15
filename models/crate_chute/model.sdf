@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Droppable supply crate with a parachute that deploys on a timer after release.
+
+  Same rig as mortar_chute, with the mortar round swapped for the classic
+  parachute_package crate. Two deliberate differences:
+
+    - NO contact sensor. detailed_mortar carries a `payload_contact` sensor and
+      that is the only thing payload_impact_scorer.py subscribes to, so this
+      crate is simply not scored. The plain <collision> below is kept so the
+      crate lands on the ground instead of falling through it - it is contact
+      *sensing* that is gone, not contact.
+    - The crate is a box, so there is no nose-down convention to respect; the
+      canopy still streams off the model's -Z, which the carrier's 3.14 pitch
+      turns into world up.
+
+  Because nothing here is scored, `PX4_GZ_PAYLOAD_SCORER=0` is worth setting -
+  px4-rc.gzsim auto-starts the scorer for any *payload* model name, and it will
+  otherwise sit there waiting for a contact topic that never appears.
+-->
+<sdf version='1.9'>
+  <model name='crate_chute'>
+
+    <!-- The crate. Named "link" so the carrier's
+         <child_link>link</child_link> resolves unchanged. -->
+    <link name='link'>
+      <inertial>
+        <mass>0.1</mass>
+        <!-- Solid box 0.15 x 0.10 x 0.18 about its centre. -->
+        <inertia>
+          <ixx>0.000353</ixx>
+          <iyy>0.000457</iyy>
+          <izz>0.000271</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+
+      <collision name='collision'>
+        <geometry>
+          <box><size>0.15 0.1 0.18</size></box>
+        </geometry>
+      </collision>
+
+      <!-- Crate mesh from the ported big_box, at the same 0.125 the classic
+           parachute_package used. -->
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>model://big_box/meshes/big_box.dae</uri>
+            <scale>0.125 0.125 0.125</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <!-- Canopy: physics only, no <visual>. The mesh lives in
+         model://parachute_canopy and is spawned on deploy - hiding a visual at
+         runtime does not reach the gz-sim 8 renderer. -->
+    <link name='canopy'>
+      <pose>0 0 -0.02 3.14159 0 0</pose>
+      <inertial>
+        <pose>0 0 0.625 0 0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <iyy>0.0002</iyy>
+          <izz>0.0004</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+    </link>
+
+    <joint name='riser' type='fixed'>
+      <parent>link</parent>
+      <child>canopy</child>
+    </joint>
+
+    <!-- Same 0.12 kg total as mortar_chute (0.1 crate + 0.02 canopy), so the
+         same area gives the same ~3.05 m/s:
+             v = sqrt(2*m*g / (rho*cd*A))
+         <area> and the payload mass are coupled - move one, move the other.
+         <cp> must match parachute_canopy's mesh scale (0.5 -> centroid 0.625). -->
+    <plugin filename="libParachuteSystem.so" name="custom::ParachuteSystem">
+      <canopy_link>canopy</canopy_link>
+      <canopy_model>parachute_canopy</canopy_model>
+      <cd>1.75</cd>
+      <area>0.12</area>
+      <air_density>1.2041</air_density>
+      <cp>0 0 0.625</cp>
+      <deploy_delay>1.5</deploy_delay>
+      <open_time>0.4</open_time>
+    </plugin>
+
+  </model>
+</sdf>
