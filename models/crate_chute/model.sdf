@@ -90,8 +90,8 @@
       <area>0.12</area>
       <air_density>1.2041</air_density>
       <cp>0 0 0.625</cp>
-      <deploy_delay>1.5</deploy_delay>
-      <open_time>0.4</open_time>
+      <deploy_delay>0.4</deploy_delay>
+      <open_time>0.1</open_time>
     </plugin>
 
   </model>
