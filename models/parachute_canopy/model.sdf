@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Canopy VISUAL only - no mass, no collision, no physics.
+
+  custom::ParachuteSystem spawns this at deploy and writes its pose every update
+  so it rides on the payload's canopy link. All the aerodynamics live in the
+  plugin, acting on that link; this model exists purely so there is nothing to
+  see until the chute actually opens.
+
+  Why a spawned model rather than a visual hidden inside mortar_chute: toggling
+  a visual's Transparency / VisualCmd at runtime does not reach the renderer in
+  gz-sim 8 - the canopy stays visible on the drone the whole flight. Creating
+  the entity is the only way to change what is drawn that does not depend on
+  renderer behaviour.
+-->
+<sdf version="1.9">
+  <model name="parachute_canopy">
+    <static>true</static>
+    <link name="link">
+      <visual name="canopy_visual">
+        <geometry>
+          <mesh>
+            <!-- 0.5 puts the canopy centroid at z = 0.625, which is what
+                 mortar_chute's <cp> is set to. Change both together. -->
+            <uri>model://parachute_small/meshes/parachute_small.dae</uri>
+            <scale>0.5 0.5 0.5</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>
