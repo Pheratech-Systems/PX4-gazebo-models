@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.9">
+  <world name="persons">
+    <physics type="ode">
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type="adiabatic"/>
+
+    <!-- Deliberately NO <plugin> tags here. gz-sim only falls back to
+         Tools/simulation/gz/server.config when the world declares none;
+         declaring even one suppresses the whole default set, which costs
+         you gz-sim-sensors-system (camera rendering), the imu/navsat/
+         magnetometer/air-pressure sims, and libGstCameraSystem.so (the
+         video stream). default.sdf, aruco.sdf and lawn.sdf are all empty
+         here for the same reason. If you ever do need a world-specific
+         plugin, you must re-list every plugin from server.config too
+         see underwater.sdf, which carries all 23. -->
+
+    <scene>
+      <!-- <grid> defaults to TRUE in SDF; left on, gz draws its origin grid
+           across the middle of the ground plane. default.sdf disables it. -->
+      <grid>false</grid>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>true</shadows>
+    </scene>
+
+    <light name="sun" type="directional">
+      <pose>0 0 10 0 0 0</pose>
+      <cast_shadows>true</cast_shadows>
+      <intensity>1</intensity>
+      <direction>-0.5 0.1 -0.9</direction>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.5 0.5 0.5 1</specular>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <!-- tan / sand (#D2B48C). Specular is kept well below the diffuse
+               so the ground reads as matte dirt rather than wet sand - a
+               high specular on a 100 m plane blows out the downward camera
+               wherever the sun angle happens to mirror into it. -->
+          <material>
+            <ambient>0.82 0.71 0.55 1</ambient>
+            <diffuse>0.82 0.71 0.55 1</diffuse>
+            <specular>0.15 0.13 0.10 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>47.397971057728974</latitude_deg>
+      <longitude_deg>8.546163739800146</longitude_deg>
+      <elevation>0</elevation>
+    </spherical_coordinates>
+
+    <!-- ================================================================
+         Same layout as soldier.sdf, with the Mingfei fuel actor that
+         person_track.sdf uses in place of the Mixamo soldier DAEs:
+           * person_patrol  - paces a 50 m line back and forth along Y,
+                              offset 40 m out on +X, well clear of origin
+           * person_sentry  - stands guard in place
+         That actor ships walk.dae and stand.dae from the same rig, so the
+         two are the same character - the walking/standing pair works the
+         same way soldier_walking / soldier_standing does.
+
+         Two consequences of the model swap, both differ from soldier.sdf:
+
+         1. NO roll. The Mixamo soldier meshes are Y-up and need roll = pi/2
+            at every waypoint to stand upright. This actor is already Z-up,
+            so roll stays 0 and yaw is plain ENU:
+              +X = 0 | +Y = 1.5708 | -X = 3.1416 | -Y = 4.7124
+
+         2. Speed is 1.0 m/s, not the soldier's 1.25 m/s - that is the rate
+            person_track.sdf walks this same clip at (5 m in 5 s), so the
+            stride matches the animation and the feet do not skate.
+
+         These are fuel:// URLs, fetched over the network on first load and
+         then cached under ~/.gz/fuel. Both meshes are already in that cache.
+         soldier.sdf by contrast resolves model:// out of the local
+         Tools/simulation/gz/models tree.
+         ================================================================ -->
+
+    <!-- ===== PATROLLING PERSON ===== -->
+    <actor name="person_patrol">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walk">
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0.0</delay_start>
+        <auto_start>true</auto_start>
+        <!-- Back and forth along x=40 between (40,-25) and (40,25) - a 50 m
+             leg, 50 s each way at 1.0 m/s. 1 s 180-deg about-face at each
+             end; 102 s round trip. Yaw only ever increases (1.5708 ->
+             4.7124 -> 7.8540 = 1.5708 + 2pi) so the loop restart is
+             continuous and he never snap-turns. -->
+        <trajectory id="0" type="walk">
+          <waypoint><time>0.0</time>   <pose>40 -25 1.0 0 0 1.5708</pose></waypoint>
+          <waypoint><time>50.0</time>  <pose>40  25 1.0 0 0 1.5708</pose></waypoint>
+          <waypoint><time>51.0</time>  <pose>40  25 1.0 0 0 4.7124</pose></waypoint>
+          <waypoint><time>101.0</time> <pose>40 -25 1.0 0 0 4.7124</pose></waypoint>
+          <waypoint><time>102.0</time> <pose>40 -25 1.0 0 0 7.8540</pose></waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+    <!-- ===== STANDING SENTRY ===== -->
+    <!-- Same trick soldier.sdf relies on: the trajectory 'type' is what
+         selects a clip, so the SKIN is the real control. skin = stand.dae
+         here, which makes idling his only motion. -->
+    <actor name="person_sentry">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/stand.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="stand">
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/stand.dae</filename>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0.0</delay_start>
+        <auto_start>true</auto_start>
+        <!-- stands at (-10,0), facing +X toward the patrol line at x=40.
+             Facing +X is yaw 0 here, not the soldier's 1.5708 - that offset
+             was an artifact of the Y-up mesh, and there is none on this one. -->
+        <trajectory id="0" type="stand">
+          <waypoint><time>0</time>  <pose>-10 0 1.0 0 0 0</pose></waypoint>
+          <waypoint><time>10</time> <pose>-10 0 1.0 0 0 0</pose></waypoint>
+        </trajectory>
+      </script>
+    </actor>
+
+  </world>
+</sdf>
