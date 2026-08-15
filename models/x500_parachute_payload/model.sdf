@@ -25,7 +25,7 @@
     <include>
       <uri>model://crate_chute</uri>
       <name>parachute_payload</name>
-      <pose>0.1 0 0.25 0 3.14 0</pose>
+      <pose>0.1 0 0.11 0 3.14 0</pose>
     </include>
 
     <!-- Holds the payload rigidly until detach message arrives -->
