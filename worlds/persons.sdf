@@ -26,7 +26,7 @@
       <grid>false</grid>
       <ambient>0.4 0.4 0.4 1</ambient>
       <background>0.7 0.7 0.7 1</background>
-      <shadows>true</shadows>
+      <shadows>false</shadows>
     </scene>
 
     <light name="sun" type="directional">
