@@ -127,6 +127,7 @@
     <!-- Same trick soldier.sdf relies on: the trajectory 'type' is what
          selects a clip, so the SKIN is the real control. skin = stand.dae
          here, which makes idling his only motion. -->
+    <!--
     <actor name="person_sentry">
       <skin>
         <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/stand.dae</filename>
@@ -139,15 +140,14 @@
         <loop>true</loop>
         <delay_start>0.0</delay_start>
         <auto_start>true</auto_start>
-        <!-- stands at (-10,0), facing +X toward the patrol line at x=40.
-             Facing +X is yaw 0 here, not the soldier's 1.5708 - that offset
-             was an artifact of the Y-up mesh, and there is none on this one. -->
         <trajectory id="0" type="stand">
           <waypoint><time>0</time>  <pose>-10 0 1.0 0 0 0</pose></waypoint>
           <waypoint><time>10</time> <pose>-10 0 1.0 0 0 0</pose></waypoint>
         </trajectory>
       </script>
     </actor>
+    -->
+
 
   </world>
 </sdf>
