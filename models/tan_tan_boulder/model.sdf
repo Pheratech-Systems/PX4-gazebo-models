@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="tan_tan_boulder">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual"><cast_shadows>true</cast_shadows><geometry><mesh><uri>model://tan_tan_boulder/meshes/boulder.glb</uri></mesh></geometry></visual>
+    </link>
+  </model>
+</sdf>

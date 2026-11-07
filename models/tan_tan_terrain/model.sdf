@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="tan_tan_terrain">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual"><cast_shadows>false</cast_shadows><geometry><mesh><uri>model://tan_tan_terrain/meshes/terrain.glb</uri></mesh></geometry></visual>
+      <collision name="collision"><geometry><mesh><uri>model://tan_tan_terrain/meshes/terrain.glb</uri></mesh></geometry></collision>
+      <collision name="skirt"><geometry><mesh><uri>model://tan_tan_terrain/meshes/skirt.glb</uri></mesh></geometry></collision>
+    </link>
+  </model>
+</sdf>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="tan_tan_dead_tree">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual"><cast_shadows>true</cast_shadows><geometry><mesh><uri>model://tan_tan_dead_tree/meshes/dead_tree.glb</uri></mesh></geometry></visual>
+    </link>
+  </model>
+</sdf>
