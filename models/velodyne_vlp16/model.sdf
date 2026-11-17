@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Velodyne VLP-16 3D lidar, ported from Clearpath's clearpath_sensors_description
+  (velodyne_lidar.urdf.xacro). Meshes and mass from velodyne_description (Dataspeed Inc.).
+
+  Scan values match what Clearpath's simulator uses (clearpath_generator_common),
+  so data lines up with a Clearpath Gazebo robot:
+    0.4 deg x 2 deg resolution: 900 x 15 samples, 360 deg horizontal, +-15 deg vertical,
+    0.9-130 m, 20 Hz, no noise.
+  A real VLP-16 has 16 channels 2 deg apart; set vertical samples to 16 to match it.
+
+  The model origin is the bottom of the sensor.
+  Topics (default Gazebo naming):
+    .../link/velodyne_vlp16_link/sensor/velodyne_vlp16/scan         gz.msgs.LaserScan
+    .../link/velodyne_vlp16_link/sensor/velodyne_vlp16/scan/points  gz.msgs.PointCloudPacked
+-->
+<sdf version='1.9'>
+  <model name='velodyne_vlp16'>
+    <pose>0 0 0 0 0 0</pose>
+    <self_collide>false</self_collide>
+    <static>false</static>
+    <link name="velodyne_vlp16_link">
+      <inertial>
+        <pose>0 0 0.03585 0 0 0</pose>
+        <mass>0.83</mass>
+        <inertia>
+          <ixx>0.000908</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.000908</iyy>
+          <iyz>0</iyz>
+          <izz>0.001105</izz>
+        </inertia>
+      </inertial>
+      <visual name="velodyne_vlp16_base_1_visual">
+        <geometry>
+          <mesh>
+            <uri>model://velodyne_vlp16/meshes/VLP16_base_1.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="velodyne_vlp16_base_2_visual">
+        <geometry>
+          <mesh>
+            <uri>model://velodyne_vlp16/meshes/VLP16_base_2.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="velodyne_vlp16_scan_visual">
+        <geometry>
+          <mesh>
+            <uri>model://velodyne_vlp16/meshes/VLP16_scan.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="velodyne_vlp16_collision">
+        <pose>0 0 0.03585 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.0516</radius>
+            <length>0.0717</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <sensor name="velodyne_vlp16" type="gpu_lidar">
+        <gz_frame_id>velodyne_vlp16_link</gz_frame_id>
+        <pose>0 0 0.0377 0 0 0</pose>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>900</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.141592</min_angle>
+              <max_angle>3.141592</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>15</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.261799</min_angle>
+              <max_angle>0.261799</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.9</min>
+            <max>130.0</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+        <always_on>1</always_on>
+        <update_rate>20</update_rate>
+        <visualize>false</visualize>
+      </sensor>
+    </link>
+  </model>
+</sdf>

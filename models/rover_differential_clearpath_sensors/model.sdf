@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Differential rover carrying the sensors ported from Clearpath's simulator, laid out
+  like a tracked rover with lidars front and back:
+    Ouster OS1 3D lidar at the front, Velodyne VLP-16 3D lidar at the rear facing backward,
+    FLIR Blackfly camera and Intel RealSense D435 at the front corners facing forward.
+  Poses are in this model's frame; the rover body is a 1 x 0.5 x 0.1 m box whose top is at z = 0.15.
+-->
+<sdf version='1.9'>
+  <model name='rover_differential_clearpath_sensors'>
+    <include merge='true'>
+      <uri>model://rover_differential</uri>
+    </include>
+
+    <include merge='true'>
+      <uri>model://ouster_os1</uri>
+      <pose>.40 0 .15 0 0 0</pose>
+    </include>
+    <joint name="ouster_os1_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>ouster_os1_link</child>
+    </joint>
+
+    <include merge='true'>
+      <uri>model://velodyne_vlp16</uri>
+      <pose>-.42 0 .15 0 0 3.141592654</pose>
+    </include>
+    <joint name="velodyne_vlp16_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>velodyne_vlp16_link</child>
+    </joint>
+
+    <include merge='true'>
+      <uri>model://flir_blackfly</uri>
+      <pose>.46 .12 .15 0 0 0</pose>
+    </include>
+    <joint name="flir_blackfly_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>flir_blackfly_link</child>
+    </joint>
+
+    <include merge='true'>
+      <uri>model://realsense_d435</uri>
+      <pose>.46 -.12 .15 0 0 0</pose>
+    </include>
+    <joint name="realsense_d435_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>realsense_d435_link</child>
+    </joint>
+  </model>
+</sdf>

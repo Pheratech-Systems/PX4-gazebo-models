@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  x500 carrying the sensors ported from Clearpath's simulator:
+    Ouster OS1 3D lidar on top, FLIR Blackfly camera on the front of the top plate,
+    Intel RealSense D435 under the nose. All face forward (+x).
+  The sensors add about 0.65 kg to the 2 kg x500.
+  Poses are in this model's frame; the x500 base_link sits at z = 0.24.
+-->
+<sdf version='1.9'>
+  <model name='x500_clearpath_sensors'>
+    <include merge='true'>
+      <uri>x500</uri>
+    </include>
+
+    <include merge='true'>
+      <uri>model://ouster_os1</uri>
+      <pose>0 0 .295 0 0 0</pose>
+    </include>
+    <joint name="ouster_os1_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>ouster_os1_link</child>
+    </joint>
+
+    <include merge='true'>
+      <uri>model://flir_blackfly</uri>
+      <pose>.10 0 .272 0 0 0</pose>
+    </include>
+    <joint name="flir_blackfly_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>flir_blackfly_link</child>
+    </joint>
+
+    <include merge='true'>
+      <uri>model://realsense_d435</uri>
+      <pose>.13 0 .195 0 0 0</pose>
+    </include>
+    <joint name="realsense_d435_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>realsense_d435_link</child>
+    </joint>
+  </model>
+</sdf>

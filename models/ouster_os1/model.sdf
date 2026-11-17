@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Ouster OS1 3D lidar, ported from Clearpath's clearpath_sensors_description
+  (ouster_os1.urdf.xacro, base: base, cap: halo).
+
+  Scan values match what Clearpath's simulator uses (clearpath_generator_common),
+  so data lines up with a Clearpath Gazebo robot:
+    1024 x 64 samples, 360 deg horizontal, +-15 deg vertical, 0.9-130 m, 20 Hz, no noise.
+  A real OS1 has about +-21.2 deg vertical and runs at 10 or 20 Hz.
+
+  The model origin is the bottom of the mounting base.
+  Topics (default Gazebo naming):
+    .../link/ouster_os1_link/sensor/ouster_os1/scan         gz.msgs.LaserScan
+    .../link/ouster_os1_link/sensor/ouster_os1/scan/points  gz.msgs.PointCloudPacked
+-->
+<sdf version='1.9'>
+  <model name='ouster_os1'>
+    <pose>0 0 0 0 0 0</pose>
+    <self_collide>false</self_collide>
+    <static>false</static>
+    <link name="ouster_os1_link">
+      <!-- lidar 0.410 kg + halo cap 0.092 kg, treated as one cylinder -->
+      <inertial>
+        <pose>0 0 0.059 0 0 0</pose>
+        <mass>0.502</mass>
+        <inertia>
+          <ixx>0.000508</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.000508</iyy>
+          <iyz>0</iyz>
+          <izz>0.000475</izz>
+        </inertia>
+      </inertial>
+      <visual name="ouster_os1_base_visual">
+        <pose>0 0 0.0225 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://ouster_os1/meshes/os1_base.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="ouster_os1_lidar_visual">
+        <pose>0 0 0.0225 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://ouster_os1/meshes/os1_lidar.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="ouster_os1_halo_visual">
+        <pose>0 0 0.0225 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://ouster_os1/meshes/os1_halo.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="ouster_os1_base_collision">
+        <pose>0 0 0.01125 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.110 0.110 0.0225</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="ouster_os1_lidar_collision">
+        <pose>0 0 0.051675 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.0435</radius>
+            <length>0.05835</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="ouster_os1_halo_collision">
+        <pose>0 0 0.09185 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.043395</radius>
+            <length>0.022</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <sensor name="ouster_os1" type="gpu_lidar">
+        <gz_frame_id>ouster_os1_link</gz_frame_id>
+        <pose>0 0 0.060695 0 0 0</pose>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>1024</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.141592</min_angle>
+              <max_angle>3.141592</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>64</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.261799</min_angle>
+              <max_angle>0.261799</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.9</min>
+            <max>130.0</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+        <always_on>1</always_on>
+        <update_rate>20</update_rate>
+        <visualize>false</visualize>
+      </sensor>
+    </link>
+  </model>
+</sdf>
