@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="alpine_forest_plants">
+    <static>true</static>
+    <link name="link">
+      <visual name="fern_a"><pose>0.28 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/fern_a.glb</uri></mesh></geometry></visual>
+      <visual name="fern_b"><pose>2.05 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/fern_b.glb</uri></mesh></geometry></visual>
+      <visual name="fern_c"><pose>3.98 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/fern_c.glb</uri></mesh></geometry></visual>
+      <visual name="fern_d"><pose>5.70 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/fern_d.glb</uri></mesh></geometry></visual>
+      <visual name="shrub_a"><pose>7.64 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/shrub_a.glb</uri></mesh></geometry></visual>
+      <visual name="shrub_b"><pose>9.86 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/shrub_b.glb</uri></mesh></geometry></visual>
+      <visual name="shrub_c"><pose>12.29 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/shrub_c.glb</uri></mesh></geometry></visual>
+      <visual name="shrub_d"><pose>14.72 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/shrub_d.glb</uri></mesh></geometry></visual>
+      <visual name="sapling_fir_a"><pose>16.69 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/sapling_fir_a.glb</uri></mesh></geometry></visual>
+      <visual name="sapling_fir_b"><pose>18.44 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/sapling_fir_b.glb</uri></mesh></geometry></visual>
+      <visual name="sapling_fir_c"><pose>20.07 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/sapling_fir_c.glb</uri></mesh></geometry></visual>
+      <visual name="sapling_pine_a"><pose>21.78 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/sapling_pine_a.glb</uri></mesh></geometry></visual>
+      <visual name="sapling_pine_b"><pose>23.43 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/sapling_pine_b.glb</uri></mesh></geometry></visual>
+      <visual name="sapling_pine_c"><pose>24.95 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_plants/meshes/sapling_pine_c.glb</uri></mesh></geometry></visual>
+    </link>
+  </model>
+</sdf>

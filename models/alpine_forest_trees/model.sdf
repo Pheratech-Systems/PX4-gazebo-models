@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="alpine_forest_trees">
+    <static>true</static>
+    <link name="link">
+      <visual name="fir_a_near"><pose>3.39 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/fir_a_near.glb</uri></mesh></geometry></visual>
+      <visual name="fir_b_near"><pose>10.64 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/fir_b_near.glb</uri></mesh></geometry></visual>
+      <visual name="fir_c_near"><pose>17.76 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/fir_c_near.glb</uri></mesh></geometry></visual>
+      <visual name="pine_a_near"><pose>26.15 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/pine_a_near.glb</uri></mesh></geometry></visual>
+      <visual name="pine_b_near"><pose>34.96 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/pine_b_near.glb</uri></mesh></geometry></visual>
+      <visual name="pine_c_near"><pose>43.55 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/pine_c_near.glb</uri></mesh></geometry></visual>
+      <visual name="young_fir_a_near"><pose>51.13 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_fir_a_near.glb</uri></mesh></geometry></visual>
+      <visual name="young_fir_b_near"><pose>57.06 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_fir_b_near.glb</uri></mesh></geometry></visual>
+      <visual name="young_fir_c_near"><pose>62.57 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_fir_c_near.glb</uri></mesh></geometry></visual>
+      <visual name="young_pine_a_near"><pose>68.53 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_pine_a_near.glb</uri></mesh></geometry></visual>
+      <visual name="young_pine_b_near"><pose>74.81 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_pine_b_near.glb</uri></mesh></geometry></visual>
+      <visual name="young_pine_c_near"><pose>80.38 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_pine_c_near.glb</uri></mesh></geometry></visual>
+      <visual name="fir_a_far"><pose>86.92 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/fir_a_far.glb</uri></mesh></geometry></visual>
+      <visual name="fir_b_far"><pose>94.44 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/fir_b_far.glb</uri></mesh></geometry></visual>
+      <visual name="fir_c_far"><pose>101.73 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/fir_c_far.glb</uri></mesh></geometry></visual>
+      <visual name="pine_a_far"><pose>110.48 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/pine_a_far.glb</uri></mesh></geometry></visual>
+      <visual name="pine_b_far"><pose>119.90 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/pine_b_far.glb</uri></mesh></geometry></visual>
+      <visual name="pine_c_far"><pose>128.74 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/pine_c_far.glb</uri></mesh></geometry></visual>
+      <visual name="young_fir_a_far"><pose>136.39 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_fir_a_far.glb</uri></mesh></geometry></visual>
+      <visual name="young_fir_b_far"><pose>142.43 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_fir_b_far.glb</uri></mesh></geometry></visual>
+      <visual name="young_fir_c_far"><pose>147.87 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_fir_c_far.glb</uri></mesh></geometry></visual>
+      <visual name="young_pine_a_far"><pose>154.06 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_pine_a_far.glb</uri></mesh></geometry></visual>
+      <visual name="young_pine_b_far"><pose>160.73 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_pine_b_far.glb</uri></mesh></geometry></visual>
+      <visual name="young_pine_c_far"><pose>166.50 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/young_pine_c_far.glb</uri></mesh></geometry></visual>
+      <visual name="clump_0"><pose>180.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_0.glb</uri></mesh></geometry></visual>
+      <visual name="clump_1"><pose>203.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_1.glb</uri></mesh></geometry></visual>
+      <visual name="clump_2"><pose>226.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_2.glb</uri></mesh></geometry></visual>
+      <visual name="clump_3"><pose>249.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_3.glb</uri></mesh></geometry></visual>
+      <visual name="clump_4"><pose>272.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_4.glb</uri></mesh></geometry></visual>
+      <visual name="clump_5"><pose>295.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_5.glb</uri></mesh></geometry></visual>
+      <visual name="clump_6"><pose>318.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_6.glb</uri></mesh></geometry></visual>
+      <visual name="clump_7"><pose>341.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_7.glb</uri></mesh></geometry></visual>
+      <visual name="clump_8"><pose>364.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_8.glb</uri></mesh></geometry></visual>
+      <visual name="clump_9"><pose>387.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_9.glb</uri></mesh></geometry></visual>
+      <visual name="clump_10"><pose>410.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_10.glb</uri></mesh></geometry></visual>
+      <visual name="clump_11"><pose>433.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_11.glb</uri></mesh></geometry></visual>
+      <visual name="clump_12"><pose>456.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_12.glb</uri></mesh></geometry></visual>
+      <visual name="clump_13"><pose>479.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_13.glb</uri></mesh></geometry></visual>
+      <visual name="clump_14"><pose>502.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_14.glb</uri></mesh></geometry></visual>
+      <visual name="clump_15"><pose>525.54 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_trees/meshes/clump_15.glb</uri></mesh></geometry></visual>
+    </link>
+  </model>
+</sdf>

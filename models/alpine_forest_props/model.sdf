@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="alpine_forest_props">
+    <static>true</static>
+    <link name="link">
+      <visual name="rock_large_a"><pose>1.12 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/rock_large_a.glb</uri></mesh></geometry></visual>
+      <visual name="rock_large_b"><pose>4.57 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/rock_large_b.glb</uri></mesh></geometry></visual>
+      <visual name="rock_large_c"><pose>7.96 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/rock_large_c.glb</uri></mesh></geometry></visual>
+      <visual name="rock_large_d"><pose>10.93 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/rock_large_d.glb</uri></mesh></geometry></visual>
+      <visual name="rock_small_a"><pose>13.68 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/rock_small_a.glb</uri></mesh></geometry></visual>
+      <visual name="rock_small_b"><pose>16.35 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/rock_small_b.glb</uri></mesh></geometry></visual>
+      <visual name="rock_small_c"><pose>19.14 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/rock_small_c.glb</uri></mesh></geometry></visual>
+      <visual name="rock_small_d"><pose>22.16 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/rock_small_d.glb</uri></mesh></geometry></visual>
+      <visual name="boulder"><pose>24.84 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/boulder.glb</uri></mesh></geometry></visual>
+      <visual name="rock_face"><pose>28.95 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/rock_face.glb</uri></mesh></geometry></visual>
+      <visual name="log"><pose>33.96 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/log.glb</uri></mesh></geometry></visual>
+      <visual name="stump_a"><pose>37.19 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/stump_a.glb</uri></mesh></geometry></visual>
+      <visual name="stump_b"><pose>39.67 0 0 0 0 0</pose><geometry><mesh><uri>model://alpine_forest_props/meshes/stump_b.glb</uri></mesh></geometry></visual>
+    </link>
+  </model>
+</sdf>
